@@ -1,5 +1,10 @@
 # MSiA423 Template Repository
 
+**Project Owner: Brian Lewis**
+
+**QA Partner: Michael Faulkner**
+
+
 <!-- toc -->
 
 - [Directory structure](#directory-structure)
