@@ -7,6 +7,7 @@
 
 <!-- toc -->
 
+- [Project Charter](#project-charter)
 - [Directory structure](#directory-structure)
 - [Running the app](#running-the-app)
   * [1. Initialize the database](#1-initialize-the-database)
@@ -23,6 +24,54 @@
   * [Workaround for potential Docker problem for Windows.](#workaround-for-potential-docker-problem-for-windows)
 
 <!-- tocstop -->
+
+## Project Charter
+
+### Background
+
+Many tourists visiting NYC find bicycling an ideal way to do sightseeing around the city. With over 1,200 miles of bike lanes throughout the city tens of millions of visitors each year, bike-sharing has become a popular way to deal with the ebb and flow of bicycle demand. Most prominent among these is Citi Bike, the official bike-sharing system of NYC. While Citi Bike allows anyone to obtain instant access to _current, real-time_ inventory of bicycles at all stations around the city, it doesn't provide an easy way to predict which stations will have enough inventory for you and anyone you travel with on the days, times, and locations that you're planning your trip to visit the city.
+
+Even for long-time residents seeking to use Citi Bikes as a commuter vehicle, it isn't always clear which stations will have available bicycles. As of yet, no known solution to solve this planning problem currently exists.
+
+### Vision
+
+To allow tourists or residents in NYC the ability to obtain reasonable predictions about Citi Bike availability at specific stations in the future so that they avoid wasting time trying to find a Citi Bike when they need it.
+
+### Mission
+
+To provide an app that will allow the user to input the following:
+
+ * Date (in the past or the future)
+ * Time of day
+ * Location
+
+And obtain the following:
+
+ * Top 5 closest Citi Bike stations to the location entered
+ * Actual average number of available bicycles at each of the top 5 stations at that time interval (if past date in existing data)
+ * Predicted average number of available bicycles at each of the top 5 stations at that time interval (if future date not in existing data)
+
+The predictions will be created after testing a variety of methods for performance, but will likely result from using Holt-Winters forecasting methods.
+
+This app will enable long-time residents as well as short-term tourists the ability to make more reliable plans that involve a Citi Bike. This app should allow the user to decrease their risk of making a plan to use a Citi Bike and arrive at a station only to find no bicycles available. This will enable a more pleasant tourist experience in sightseeing around the city, and a more pleasant commuter experience for residents using Citi Bikes to get to and from work.
+
+Data source: [NYC Citi Bike Trips](https://console.cloud.google.com/marketplace/product/city-of-new-york/nyc-citi-bike) (2013-2020), publicly hosted by Google BigQuery 
+
+
+
+### Success Criteria
+
+Model performance metric:
+
+ * The model will succeed if it can predict the number of available bikes at a given bike station, date, and time of day with a cross-validation R^2 of 0.7. 
+
+Business metrics:
+
+ * Ratio of Citi Bike rental conversion between:
+   * Those who only visited the Citi Bike "real-time availability" page
+   * Those who visited the Citi Bike "real-time availability" page AND used the app
+ * % decrease in disproportionate bike availability across all Citi Bike stations (e.g. more similar bicycle distribution across all Citi Bike stations)
+
 
 ## Directory structure 
 
