@@ -70,7 +70,7 @@ Business metrics:
  * Ratio of Citi Bike rental conversion between:
    * Those who only visited the Citi Bike "real-time availability" page
    * Those who visited the Citi Bike "real-time availability" page AND used the app
- * % decrease in disproportionate bike availability across all Citi Bike stations (e.g. more similar bicycle distribution across all Citi Bike stations)
+ * % increase in ratio of bike availability across all Citi Bike stations (e.g. we expect to see more similar bicycle distribution across all Citi Bike stations resulting from greater use of planning app to arbitrage high-availability locations)
 
 
 ## Directory structure 
