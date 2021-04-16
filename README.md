@@ -23,6 +23,8 @@
   * [3. Kill the container](#3-kill-the-container)
   * [Workaround for potential Docker problem for Windows.](#workaround-for-potential-docker-problem-for-windows)
 
+(TOC will be updated through time)
+
 <!-- tocstop -->
 
 ## Project Charter
