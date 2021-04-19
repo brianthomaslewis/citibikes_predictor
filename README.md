@@ -65,7 +65,7 @@ Model performance metric:
 
  * The model will succeed if it can predict the number of available bikes at a given bike station, date, and time of day with a cross-validation R^2 of 0.7. 
 
-Business metrics:
+Business metrics (if implemented within the Citi Bike data science team):
 
  * Ratio of Citi Bike rental conversion between:
    * Those who only visited the Citi Bike "real-time availability" page
