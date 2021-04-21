@@ -67,10 +67,9 @@ Model performance metric:
 
 Business metrics (if implemented within the Citi Bike data science team):
 
- * Ratio of Citi Bike rental conversion between:
-   * Those who only visited the Citi Bike "real-time availability" page
-   * Those who visited the Citi Bike "real-time availability" page AND used the app
- * Ratio of similar bike availability levels across all Citi Bike stations (e.g. we expect to see more similar bicycle distribution across all Citi Bike stations resulting from greater use of planning app to arbitrage high-availability locations)
+ * Rates of return-users of the app
+ * (If possible) Linking return-users of the app with actual use metrics of Citi Bike
+   * This would allow seeing if users who make use of the app use Citi Bike more than those who do not
 
 
 ## Directory structure 
