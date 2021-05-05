@@ -1,6 +1,26 @@
-Flask-SQLAlchemy==2.4.1
-SQLAlchemy==1.3.15
-PyYAML==5.3.1
-Flask==1.1.1
-pymysql==0.9.3
-pytest==5.4.2
+# This file may be used to create an environment using:
+# $ conda create --name <env> --file <this file>
+# platform: osx-64
+
+boto3~=1.17.66
+pip
+wheel
+pandas
+pyarrow
+google~=3.0.0
+google-api-core
+google-auth
+google-cloud
+google-cloud-bigquery
+google-cloud-bigquery-storage
+google-cloud-core
+google-cloud-storage
+google-crc32c
+google-resumable-media
+googleapis-common-protos
+setuptools
+sqlalchemy
+pymysql
+requests~=2.25.1
+cryptography
+botocore~=1.20.66

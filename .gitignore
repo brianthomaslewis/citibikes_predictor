@@ -7,6 +7,9 @@ __pycache__/
 .log
 .ipynb_checkpoints/
 
+# JSON export from Google BigQuery credentials
+./config/local/bigquery_credentials.json
+
 
 data/*
 !data/sample/

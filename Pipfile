@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+zlib = "*"
+openssl = "*"
+pandas = "*"
+google = "*"
+google-api-core = "*"
+google-auth = "*"
+google-cloud = "*"
+google-cloud-bigquery = "*"
+google-cloud-bigquery-storage = "*"
+google-cloud-core = "*"
+google-cloud-storage = "*"
+google-crc32c = "*"
+google-resumable-media = "*"
+googleapis-common-protos = "*"
+requests = "*"
+cryptography = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"
