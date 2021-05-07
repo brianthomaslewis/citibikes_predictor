@@ -121,8 +121,8 @@ Business metrics:
 ```
 ## Running the app in Docker 
 
-(NOTE: Use of this app and Docker image requires the use of Python 3. 
-Versions below Python 3 may produce unforeseen errors and should not be used.)
+(NOTE: Use of this app and Docker image requires the use of Python 3.6 or higher. 
+Versions below Python 3.6 may produce unforeseen errors and should not be used.)
 
 ### 1. Build the image 
 
