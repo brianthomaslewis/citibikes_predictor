@@ -183,11 +183,14 @@ In order to acquire the `stations` and `trips` raw data and upload them to an S3
 docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e GOOGLE_APPLICATION_CREDENTIALS citibikes-predictor run.py download_raw_data
 ```
 
+
 The `download_raw_data` function also takes the following optional arguments:
 
+
+
 ```bash
---trips_only <TRUE/FALSE; if TRUE, no Google BigQuery credentials are required>
---s3_bucket <name of bucket on S3>
+--trips_only   <boolean TRUE/FALSE>
+--s3_bucket    <name of bucket on S3>
 --s3_directory <name of the directory within the S3 bucket to place data into>
 ```
 
@@ -201,9 +204,12 @@ If you wish to save the data on another S3 bucket, specifying `--s3_bucket` will
 
 **By default, `--trips_only` is set to `FALSE`, but if you specify it to `TRUE`, no Google BigQuery credentials are required, 
 and you can omit the `-e GOOGLE_APPLICATION_CREDENTIALS` segment from the above `docker run` command, i.e.:*
+
 ```bash
 docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY citibikes-predictor run.py download_raw_data
 ```
+
+
 
 
 ### 4. Initialize the database on RDS (or locally)
