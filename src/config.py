@@ -3,7 +3,7 @@ from os import path
 import yaml
 DEBUG = True
 PORT = 5000
-APP_NAME = "citibike-availability-predictor"
+APP_NAME = "citibikes-predictor"
 HOST = "0.0.0.0"
 SQLALCHEMY_ECHO = False  # If true, SQL for queries made will be printed
 MAX_ROWS_SHOW = 100

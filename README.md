@@ -57,8 +57,9 @@ The predictions will be created after testing a variety of methods for performan
 
 This app will enable long-time residents as well as short-term tourists the ability to make more reliable plans that involve a Citi Bike. This app should allow the user to decrease their risk of making a plan to use a Citi Bike and arrive at a station only to find no bicycles available. This will enable a more pleasant tourist experience in sightseeing around the city, and a more pleasant commuter experience for residents using Citi Bikes to get to and from work.
 
-Data source: [NYC Citi Bike Trips](https://console.cloud.google.com/marketplace/product/city-of-new-york/nyc-citi-bike) (2013-2020), publicly hosted by Google BigQuery 
+Citi Bike Stations Data source: [NYC Citi Bike Stations](https://console.cloud.google.com/marketplace/product/city-of-new-york/nyc-citi-bike), publicly hosted by Google BigQuery 
 
+Citi Bike Trips Data source: [NYC Citi Bike Trips](https://s3.amazonaws.com/tripdata/index.html) (2013-2021)
 
 
 ### Success Criteria
@@ -118,144 +119,145 @@ Business metrics:
 ├── run.py                            <- Simplifies the execution of one or more of the src scripts  
 ├── requirements.txt                  <- Python package dependencies 
 ```
-
-## Running the app
-### 1. Initialize the database 
-
-#### Create the database 
-To create the database in the location configured in `config.py` run: 
-
-`python run.py create_db --engine_string=<engine_string>`
-
-By default, `python run.py create_db` creates a database at `sqlite:///data/tracks.db`.
-
-#### Adding songs 
-To add songs to the database:
-
-`python run.py ingest --engine_string=<engine_string> --artist=<ARTIST> --title=<TITLE> --album=<ALBUM>`
-
-By default, `python run.py ingest` adds *Minor Cause* by Emancipator to the SQLite database located in `sqlite:///data/tracks.db`.
-
-#### Defining your engine string 
-A SQLAlchemy database connection is defined by a string with the following format:
-
-`dialect+driver://username:password@host:port/database`
-
-The `+dialect` is optional and if not provided, a default is used. For a more detailed description of what `dialect` and `driver` are and how a connection is made, you can see the documentation [here](https://docs.sqlalchemy.org/en/13/core/engines.html). We will cover SQLAlchemy and connection strings in the SQLAlchemy lab session on 
-##### Local SQLite database 
-
-A local SQLite database can be created for development and local testing. It does not require a username or password and replaces the host and port with the path to the database file: 
-
-```python
-engine_string='sqlite:///data/tracks.db'
-
-```
-
-The three `///` denote that it is a relative path to where the code is being run (which is from the root of this directory).
-
-You can also define the absolute path with four `////`, for example:
-
-```python
-engine_string = 'sqlite://///Users/cmawer/Repos/2020-MSIA423-template-repository/data/tracks.db'
-```
-
-
-### 2. Configure Flask app 
-
-`config/flaskconfig.py` holds the configurations for the Flask app. It includes the following configurations:
-
-```python
-DEBUG = True  # Keep True for debugging, change to False when moving to production 
-LOGGING_CONFIG = "config/logging/local.conf"  # Path to file that configures Python logger
-HOST = "0.0.0.0" # the host that is running the app. 0.0.0.0 when running locally 
-PORT = 5000  # What port to expose app on. Must be the same as the port exposed in app/Dockerfile 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///data/tracks.db'  # URI (engine string) for database that contains tracks
-APP_NAME = "penny-lane"
-SQLALCHEMY_TRACK_MODIFICATIONS = True 
-SQLALCHEMY_ECHO = False  # If true, SQL for queries made will be printed
-MAX_ROWS_SHOW = 100 # Limits the number of rows returned from the database 
-```
-
-### 3. Run the Flask app 
-
-To run the Flask app, run: 
-
-```bash
-python app.py
-```
-
-You should now be able to access the app at http://0.0.0.0:5000/ in your browser.
-
 ## Running the app in Docker 
 
 ### 1. Build the image 
 
-The Dockerfile for running the flask app is in the `app/` folder. To build the image, run from this directory (the root of the repo): 
+The Dockerfile for running the app is in the `app/` folder. To build the image, run from this directory (the root of the repo): 
 
 ```bash
- docker build -f app/Dockerfile -t pennylane .
+ docker build -f app/Dockerfile -t citibikes-predictor .
 ```
 
-This command builds the Docker image, with the tag `pennylane`, based on the instructions in `app/Dockerfile` and the files existing in this directory.
+This command builds the Docker image, with the tag `citibikes-predictor`, based on the instructions in `app/Dockerfile` and the files existing in this directory.
  
-### 2. Run the container 
+### 2. Set downloading/uploading credentials and source environmental variables 
 
-To run the app, run from this directory: 
+Before downloading the raw Citibikes data, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `GOOGLE_APPLICATION_CREDENTIALS` 
+should be environmental variables in your current terminal session. They can be specified by the following steps for 
+either **repeated use** ***or*** **one-time use**.
 
+*  AWS Credentials (**repeated use**):
+    *  Modify `config/.awsconfig` to include your `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` credentials 
+    *  Run the following code from the root of this repository to source and verify your AWS credentials:
 ```bash
-docker run -p 5000:5000 --name test pennylane
-```
-You should now be able to access the app at http://0.0.0.0:5000/ in your browser.
+source config/.awsconfig
+echo $AWS_ACCESS_KEY_ID
+echo $AWS_SECRET_ACCESS_KEY
+````
 
-This command runs the `pennylane` image as a container named `test` and forwards the port 5000 from container to your laptop so that you can access the flask app exposed through that port. 
-
-If `PORT` in `config/flaskconfig.py` is changed, this port should be changed accordingly (as should the `EXPOSE 5000` line in `app/Dockerfile`)
-
-### 3. Kill the container 
-
-Once finished with the app, you will need to kill the container. To do so: 
-
+*  AWS Credentials (**one-time use**):
+    *  Run the following code from the root of this repository to create and verify your AWS credentials:
 ```bash
-docker kill test 
-```
+export AWS_ACCESS_KEY_ID     = <Your AWS access key ID>
+export AWS_SECRET_ACCESS_KEY = <Your AWS secret access key>
 
-where `test` is the name given in the `docker run` command.
+echo $AWS_ACCESS_KEY_ID
+echo $AWS_SECRET_ACCESS_KEY
+```    
 
-### Example using `python3` as an entry point
-
-We have included another example of a Dockerfile, `app/Dockerfile_python` that has `python3` as the entry point such that when you run the image as a container, the command `python3` is run, followed by the arguments given in the `docker run` command after the image name. 
-
-To build this image: 
-
+*  Google BigQuery Credentials (**repeated use**):
+    *  If you have not already, create a Google Cloud service account key (in the form of a .json file) following the instructions here: https://cloud.google.com/docs/authentication/getting-started
+    *  Modify `config/.bigqueryconfig` to include the full .json credentials file path as `GOOGLE_APPLICATION_CREDENTIALS`.
+    *  Run the following code from the root of this repository to source and verify your Google BigQuery credentials file path:
 ```bash
- docker build -f app/Dockerfile_python -t pennylane .
-```
-
-then run the `docker run` command: 
-
-```bash
-docker run -p 5000:5000 --name test pennylane app.py
+source config/.bigqueryconfig
+echo $GOOGLE_APPLICATION_CREDENTIALS
 ```
 
-The new image defines the entry point command as `python3`. Building the sample PennyLane image this way will require initializing the database prior to building the image so that it is copied over, rather than created when the container is run. Therefore, please **do the step [Create the database with a single song](#create-the-database-with-a-single-song) above before building the image**.
-
-# Testing
-
-From within the Docker container, the following command should work to run unit tests when run from the root of the repository: 
-
+*  Google BigQuery Credentials (**one-time use**):
+    *  If you have not already, create a Google Cloud service account key (in the form of a .json file) following the instructions here: https://cloud.google.com/docs/authentication/getting-started
+    *  Run the following code from the root of this repository to create and verify your Google BigQuery credentials file path:
 ```bash
-python -m pytest
-``` 
-
-Using Docker, run the following, if the image has not been built yet:
-
-```bash
- docker build -f app/Dockerfile_python -t pennylane .
+export GOOGLE_APPLICATION_CREDENTIALS = <file path to Google service account key .json> 
+echo $GOOGLE_APPLICATION_CREDENTIALS
 ```
 
-To run the tests, run: 
+Once these enviromental variables have been set and implemented, you should be able to run the below Docker commands to 
+download and upload the Citi Bikes data.
+
+### 3. Download raw Citi Bikes data and upload to an S3 bucket
+
+In order to acquire the `stations` and `trips` raw data and upload them to an S3 bucket, run the following code from the root of the repository:
+```bash
+docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e GOOGLE_APPLICATION_CREDENTIALS citibikes-predictor run.py download_raw_data
+```
+
+The `download_raw_data` function also takes the following optional arguments:
 
 ```bash
- docker run penny -m pytest
+--trips_only <TRUE/FALSE; if TRUE, no Google BigQuery credentials are required>
+--s3_bucket <name of bucket on S3>
+--s3_directory <name of the directory within the S3 bucket to place data into>
 ```
- 
+
+If no options are specified, the `stations` and `trips` raw data will be saved to `data/stations.csv` and `data/trips.csv`, 
+respectively, within the repository. Those files will be uploaded into the S3 bucket located at `s3://2021-msia423-lewis-brian/raw/stations.csv` 
+and `s3://2021-msia423-lewis-brian/raw/trips.csv`, respectively.
+
+
+If you wish to save the data on another S3 bucket, specifying `--s3_bucket` will allow you to do so.
+
+
+**By default, `--trips_only` is set to `FALSE`, but if you specify it to `TRUE`, no Google BigQuery credentials are required, 
+and you can omit the `-e GOOGLE_APPLICATION_CREDENTIALS` segment from the above `docker run` command, i.e.:*
+```bash
+docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY citibikes-predictor run.py download_raw_data
+```
+
+
+### 4. Initialize the database on RDS (or locally)
+
+Before trying to create a database on RDS, you will need to *first log in to Northwestern's VPN*.
+
+Next, we will first need to follow a similar pattern as above for 
+setting environmental variables for either **repeated use** ***or*** **one-time use**. 
+
+*  For **repeated use**:
+   *  Modify `config/.sqlconfig` to include your `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_HOST`, `MYSQL_PORT`, 
+       and `DATABASE_NAME` variables.
+   *  Run the following code from the root of this repository to source and verify your MySQL environmental variables:
+```bash
+source config/.sqlconfig
+echo $MYSQL_USER
+echo $MYSQL_PASSWORD
+echo $MYSQL_HOST
+echo $MYSQL_PORT
+echo $DATABASE_NAME
+```   
+
+*  For **one-time use**: 
+   *  Run the following code from the root of this repository to create and verify your MySQL environmental variables:
+```bash
+export MYSQL_USER     = <Your MySQL username>
+export MYSQL_PASSWORD = <Your MySQL password>
+export MYSQL_HOST     = <Your MySQL RDS host>
+export MYSQL_PORT     = <Your MySQL port>
+export DATABASE_NAME  = <Your MySQL database name>
+
+echo $MYSQL_USER
+echo $MYSQL_PASSWORD
+echo $MYSQL_HOST
+echo $MYSQL_PORT
+echo $DATABASE_NAME
+```
+
+Once these variables have been set, they can be passed in to the Docker image with the `create_db` function to create the
+database as shown in the code here:
+
+```bash
+docker run -e MYSQL_HOST -e MYSQL_PORT -e MYSQL_USER -e MYSQL_PASSWORD -e DATABASE_NAME citibikes-predictor run.py create_db
+```
+
+Alternatively, the database can be placed in a different location than RDS by specifying the `--engine_string` argument:
+
+```bash
+docker run citibikes-predictor run.py create_db --engine_string=<database path>
+```
+
+Or, if you would like only to create a local database created at the default path `sqlite:///data/msia423_db.db`, you can
+run the following code which omits all environmental variables:
+
+```bash
+docker run citibikes-predictor run.py create_db
+```

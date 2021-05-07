@@ -13,25 +13,33 @@ logging.config.fileConfig(fname=config.LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
 """
-Download Citibike stations data, trips data and writes all downloaded raw data to s3 as well
+Download Citi Bike stations data, trips data and writes all downloaded raw data to s3 as well
 """
 
 
-def acquire_data(s3_bucket, s3_directory):
+def acquire_data(trips_only, s3_bucket, s3_directory):
     """
     runs all downloading scripts to generate all raw data and then writes them to s3 bucket by calling
     'writeRawToS3()' function
 
     Args:
+        trips_only: T/F toggle to indicate whether to only download "trips" data
         s3_bucket: S3 bucket name without the 's3://' prefix needed
         s3_directory: S3 bucket directory within which to write the file
 
     Returns: None--all data sets saved to paths specified in config.py
 
     """
-    download_stations_data()
-    download_trips_data()
-    writeRawToS3(s3_bucket, s3_directory)
+    if trips_only == 'FALSE':
+        download_stations_data()
+        download_trips_data()
+        writeRawToS3(s3_bucket, s3_directory)
+    elif trips_only == 'TRUE':
+        download_trips_data()
+        writeRawToS3(s3_bucket, s3_directory)
+    else:
+        logger.error("--trips_only option misspecified. Please enter 'TRUE' or 'FALSE' and try again.")
+        sys.exit(1)
 
 
 def upload_file(file_name, bucket, directory, file_suffix):

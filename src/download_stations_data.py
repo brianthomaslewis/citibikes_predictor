@@ -4,8 +4,9 @@ import pandas as pd
 from src.bq_helper import BigQueryHelper
 import src.config as config
 
+logging.config.fileConfig(fname=config.LOGGING_CONFIG)
+logger = logging.getLogger(__name__)
 
-# In[8]:
 
 def download_stations_data(stations_output_path=config.STATIONS_FILE_LOCATION, bq_project_name=config.BIGQUERY_PROJECT,
                            bq_dataset=config.BIGQUERY_DATASET, query=config.BIGQUERY_QUERY):
@@ -33,9 +34,11 @@ def download_stations_data(stations_output_path=config.STATIONS_FILE_LOCATION, b
     query1 = query
 
     try:
+        logger.info("Attempting to query Google BigQuery for Citi Bike stations data.")
         response1 = nyc_bikes.query_to_pandas_safe(query1, max_gb_scanned=25)
     except requests.exceptions.ConnectionError:
         logger.error("There was a connection error to Google BigQuery. Please try again or verify the query.")
         sys.exit(1)
 
     response1.to_csv(stations_output_path, index=False)
+    logger.info("Success! Wrote Citi Bike stations data to {}.".format(stations_output_path))

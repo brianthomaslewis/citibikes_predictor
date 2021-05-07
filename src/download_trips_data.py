@@ -126,9 +126,9 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
 
     # Download raw zip files in ThreadPool
     ThreadPool(threads).imap_unordered(url_response, urls)
-    logger.info("Downloading raw Citibike files from months {} to {} using {} threads to {}. "
-                "Sleep time during multi-thread download: {} seconds.".format(
-        month_start, month_end, threads, zip_data_path, sleep_time))
+    logger.info("Downloading raw Citi Bike files from months {} to {} using {} threads to {}. "
+                "Sleep time during multi-thread download: {} seconds.".format(month_start, month_end, threads,
+                                                                              zip_data_path, sleep_time))
     sleep(sleep_time)
 
     # Open, process, aggregate, and save processed data.
@@ -172,7 +172,7 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
     df = pd.concat((pd.read_csv(f, usecols=[1, 2, 3, 4, 5]) for f in files))
 
     df.to_csv(output_path, index=False)
-    logger.info("Successfully wrote Citibikes trip output to {}.".format(output_path))
+    logger.info("Success! Wrote Citi Bikes trip output to {}.".format(output_path))
 
     # Remove raw and intermediate data (if output performed correctly)
     file = Path(output_path)
@@ -183,5 +183,3 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
         logger.error("Download process to obtain output 'trips.csv' file not completed successfully. "
                      "Please try again or consider respecifying function options.")
         sys.exit(1)
-
-
