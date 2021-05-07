@@ -29,4 +29,16 @@ def create_db(engine_string=config.SQLALCHEMY_DATABASE_URI):
         def __repr__(self):
             return '<Stations %r>' % self.title
 
+    class trips(Base):
+        """Create a data model for the database to be set up for bike stations """
+        __tablename__ = 'trips'
+        station_id = Column(Integer, primary_key=True)
+        date = Column(DateTime)
+        hour = Column(Integer)
+        inflows = Column(Integer)
+        outflows = Column(Integer)
+
+        def __repr__(self):
+            return '<Trips %r>' % self.title
+
     Base.metadata.create_all(engine)
