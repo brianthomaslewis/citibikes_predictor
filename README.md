@@ -121,15 +121,18 @@ Business metrics:
 ```
 ## Running the app in Docker 
 
+(NOTE: Use of this app and Docker image requires the use of Python 3. 
+Versions below Python 3 may produce unforeseen errors and should not be used.)
+
 ### 1. Build the image 
 
-The Dockerfile for running the app is in the `app/` folder. To build the image, run from this directory (the root of the repo): 
+The Dockerfile for running the app is in the `app/` folder. To build the image, run from the root of this repository: 
 
 ```bash
  docker build -f app/Dockerfile -t citibikes-predictor .
 ```
 
-This command builds the Docker image, with the tag `citibikes-predictor`, based on the instructions in `app/Dockerfile` and the files existing in this directory.
+This command builds the Docker image, with the name (tag) `citibikes-predictor`. It uses the instructions in `app/Dockerfile` and relies on the files existing in this directory.
  
 ### 2. Set downloading/uploading credentials and source environmental variables 
 

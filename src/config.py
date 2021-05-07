@@ -36,7 +36,7 @@ BIGQUERY_QUERY = """
 STATIONS_FILE_LOCATION = file_config['local']['STATIONS_FILE_LOCATION']
 
 # Citibike Trips data download specifications #
-YRMO_START = '202003'  # data begin in 201306
+YRMO_START = '202009'  # data begin in 201306
 YRMO_END = '202103'  # data end in 202103
 TRIPS_ZIP_LOCATION = file_config['local']['TRIPS_ZIP_LOCATION']
 TRIPS_CSV_LOCATION = file_config['local']['TRIPS_CSV_LOCATION']
@@ -45,8 +45,8 @@ TRIPS_URL_STEM = 'https://s3.amazonaws.com/tripdata/'
 TRIPS_SUFFIX_1 = '-citibike-tripdata.zip'
 TRIPS_SUFFIX_2 = '-citibike-tripdata.csv.zip'
 TRIPS_LABEL_CHUNK = 'citibikes_'
-TRIPS_THREADS = 8
-TRIPS_SLEEP_TIME = 60  # Seconds to sleep while downloading with threads
+TRIPS_THREADS = 4
+TRIPS_SLEEP_TIME = 20  # Seconds to sleep while downloading with threads
 
 # AWS S3 Bucket and Object Names Setup #
 S3_BUCKETNAME = file_config['aws-s3']['S3_BUCKETNAME']

@@ -136,7 +136,7 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
         sys.exit(1)
 
     # Open, process, aggregate, and save processed data.
-    logger.info("Processing downloaded .zip files into intermediate .csv files and saving to {}.".format(csv_data_path))
+    logger.info("Attempting to process downloadeded .zip files into intermediate .csv files and saving to {}.".format(csv_data_path))
     try:
         for path in pr_paths:
             # Read in CSV and rename columns for ease of use
@@ -170,7 +170,8 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
 
             # Export to csv
             flows.to_csv(path[1])
-    except FileNotFoundError:
+    except zipfile.BadZipFile as e:
+        logger.error(e)
         logger.error("Multi-thread downloading did not complete as designed. Try specifying a lower '--thread' count "
                      "and higher '--sleep_time' value and try again.")
         sys.exit(1)

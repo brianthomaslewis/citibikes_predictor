@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     # Sub-parser for downloading raw data from Citi Bike and uploading to S3
     sb_download = subparsers.add_parser("download_raw_data", description="Download Citi Bike data and store in S3")
-    sb_download.add_argument("--trips_only", default='FALSE', help="Toggle for downloading only 'trips' dataset")
+    sb_download.add_argument("--trips_only", default='FALSE', help="T/F Toggle for downloading only 'trips' dataset")
     sb_download.add_argument("--threads", default=config.TRIPS_THREADS,
                              help="Number of threads with which to download the data")
     sb_download.add_argument("--sleep_time", default=config.TRIPS_SLEEP_TIME,
@@ -35,3 +35,5 @@ if __name__ == '__main__':
         acquire_data(args.trips_only, args.threads, args.sleep_time, args.s3_bucket, args.s3_directory)
     elif sp_used == 'create_db':
         create_db(args.engine_string)
+    else:
+        parser.print_help()

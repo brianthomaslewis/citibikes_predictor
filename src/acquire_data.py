@@ -8,7 +8,6 @@ from src.download_stations_data import download_stations_data
 from src.download_trips_data import download_trips_data
 import src.config as config
 
-
 logging.config.fileConfig(fname=config.LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
@@ -24,6 +23,8 @@ def acquire_data(trips_only, threads, sleep_time, s3_bucket, s3_directory):
 
     Args:
         trips_only: T/F toggle to indicate whether to only download "trips" data
+        threads: Number of threads to use while downloading
+        sleep_time: Number of seconds to sleep while performing multi-thread downloading.
         s3_bucket: S3 bucket name without the 's3://' prefix needed
         s3_directory: S3 bucket directory within which to write the file
 
@@ -32,11 +33,11 @@ def acquire_data(trips_only, threads, sleep_time, s3_bucket, s3_directory):
     """
     if trips_only == 'FALSE':
         download_stations_data()
-        download_trips_data(threads, sleep_time)
-        writeRawToS3(s3_bucket, s3_directory)
+        download_trips_data(threads=int(threads), sleep_time=int(sleep_time))
+        writeRawToS3(s3_bucket=s3_bucket, s3_directory=s3_directory)
     elif trips_only == 'TRUE':
-        download_trips_data(threads, sleep_time)
-        writeRawToS3(s3_bucket, s3_directory)
+        download_trips_data(threads=int(threads), sleep_time=int(sleep_time))
+        writeRawToS3(s3_bucket=s3_bucket, s3_directory=s3_directory)
     else:
         logger.error("--trips_only option misspecified. Please enter 'TRUE' or 'FALSE' and try again.")
         sys.exit(1)
@@ -92,6 +93,7 @@ def writeRawToS3(s3_bucket=config.S3_BUCKETNAME, s3_directory=config.S3_DIRECTOR
 
     upload_file(config.STATIONS_FILE_LOCATION, s3_bucket, s3_directory, config.S3_STATIONS)
     upload_file(config.TRIPS_FILE_LOCATION, s3_bucket, s3_directory, config.S3_TRIPS)
+
 
 if __name__ == '__main__':
     acquire_data()

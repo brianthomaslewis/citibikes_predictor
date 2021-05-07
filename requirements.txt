@@ -2,10 +2,10 @@
 # $ conda create --name <env> --file <this file>
 # platform: osx-64
 
-boto3~=1.17.66
+boto3
 pip
 wheel
-pandas~=1.2.4
+pandas
 pyarrow
 google~=3.0.0
 google-api-core
@@ -20,10 +20,10 @@ google-resumable-media
 googleapis-common-protos
 numpy
 setuptools
-sqlalchemy~=1.4.13
+sqlalchemy
 pytest
-pymysql~=1.0.2
-PyYAML~=5.4.1
-requests~=2.25.1
+pymysql
+PyYAML
+requests
 cryptography
-botocore~=1.20.66
+botocore
