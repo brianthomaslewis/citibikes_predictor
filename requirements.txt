@@ -5,7 +5,7 @@
 boto3~=1.17.66
 pip
 wheel
-pandas
+pandas~=1.2.4
 pyarrow
 google~=3.0.0
 google-api-core
@@ -18,10 +18,12 @@ google-cloud-storage
 google-crc32c
 google-resumable-media
 googleapis-common-protos
+numpy
 setuptools
-sqlalchemy
-pymysql
-PyYAML
+sqlalchemy~=1.4.13
+pytest
+pymysql~=1.0.2
+PyYAML~=5.4.1
 requests~=2.25.1
 cryptography
 botocore~=1.20.66

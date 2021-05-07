@@ -5,14 +5,13 @@ import itertools
 import zipfile
 import datetime
 import shutil
+import logging.config
 from time import sleep
 import requests
 import pandas as pd
 from pathlib import Path
-from src.bq_helper import BigQueryHelper
 from multiprocessing.pool import ThreadPool
-import logging.config
-
+from src.bq_helper import BigQueryHelper
 import src.config as config
 
 logging.config.fileConfig(fname=config.LOGGING_CONFIG)
@@ -125,46 +124,56 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
                 f'{csv_data_path}{label_chunk}{date}.csv'])  # Path to which you want to save processed .csv file
 
     # Download raw zip files in ThreadPool
-    ThreadPool(threads).imap_unordered(url_response, urls)
-    logger.info("Downloading raw Citi Bike files from months {} to {} using {} threads to {}. "
-                "Sleep time during multi-thread download: {} seconds.".format(month_start, month_end, threads,
-                                                                              zip_data_path, sleep_time))
-    sleep(sleep_time)
+    try:
+        ThreadPool(threads).imap_unordered(url_response, urls)
+        logger.info("Downloading raw Citi Bike files from months {} to {} using {} threads to {}. "
+                    "Sleep time during multi-thread download: {} seconds.".format(month_start, month_end, threads,
+                                                                                  zip_data_path, sleep_time))
+        sleep(sleep_time)
+    except requests.exceptions.ConnectionError as e:
+        logger.error(e)
+        logger.error("Could not connect. Try checking your internet connection and trying again.")
+        sys.exit(1)
 
     # Open, process, aggregate, and save processed data.
     logger.info("Processing downloaded .zip files into intermediate .csv files and saving to {}.".format(csv_data_path))
-    for path in pr_paths:
-        # Read in CSV and rename columns for ease of use
-        zf = zipfile.ZipFile(path[0])  # Obtain zipper object of zip folder
-        target = zf.namelist()[0]  # Extracts relevant .csv file from zip folder
-        df = pd.read_csv(zf.open(target), usecols=[1, 2, 3, 7])
-        df.columns = ['start_time', 'stop_time', 'start_station_id', 'end_station_id']
+    try:
+        for path in pr_paths:
+            # Read in CSV and rename columns for ease of use
+            zf = zipfile.ZipFile(path[0])  # Obtain zipper object of zip folder
+            target = zf.namelist()[0]  # Extracts relevant .csv file from zip folder
+            df = pd.read_csv(zf.open(target), usecols=[1, 2, 3, 7])
+            df.columns = ['start_time', 'stop_time', 'start_station_id', 'end_station_id']
 
-        # Create inflows table
-        infl = df[['end_station_id', 'stop_time']].copy()
-        infl.loc[:, 'stop_time'] = pd.to_datetime(infl['stop_time'], infer_datetime_format=True)
-        infl.loc[:, 'date'] = infl['stop_time'].dt.date
-        infl.loc[:, 'hour'] = infl['stop_time'].dt.hour
-        infl.loc[:, 'inflows'] = 1
-        infl.rename(columns={'end_station_id': 'station_id'}, inplace=True)
-        infl.drop('stop_time', axis='columns', inplace=True)
-        inflows = infl.groupby(['station_id', 'date', 'hour']).sum().reset_index()
+            # Create inflows table
+            infl = df[['end_station_id', 'stop_time']].copy()
+            infl.loc[:, 'stop_time'] = pd.to_datetime(infl['stop_time'], infer_datetime_format=True)
+            infl.loc[:, 'date'] = infl['stop_time'].dt.date
+            infl.loc[:, 'hour'] = infl['stop_time'].dt.hour
+            infl.loc[:, 'inflows'] = 1
+            infl.rename(columns={'end_station_id': 'station_id'}, inplace=True)
+            infl.drop('stop_time', axis='columns', inplace=True)
+            inflows = infl.groupby(['station_id', 'date', 'hour']).sum().reset_index()
 
-        # Create outflows table
-        outf = df[['start_station_id', 'start_time']].copy()
-        outf.loc[:, 'start_time'] = pd.to_datetime(outf['start_time'], infer_datetime_format=True)
-        outf.loc[:, 'date'] = outf['start_time'].dt.date
-        outf.loc[:, 'hour'] = outf['start_time'].dt.hour
-        outf.loc[:, 'outflows'] = 1
-        outf.rename(columns={'start_station_id': 'station_id'}, inplace=True)
-        outf.drop('start_time', axis='columns', inplace=True)
-        outflows = outf.groupby(['station_id', 'date', 'hour']).sum().reset_index()
+            # Create outflows table
+            outf = df[['start_station_id', 'start_time']].copy()
+            outf.loc[:, 'start_time'] = pd.to_datetime(outf['start_time'], infer_datetime_format=True)
+            outf.loc[:, 'date'] = outf['start_time'].dt.date
+            outf.loc[:, 'hour'] = outf['start_time'].dt.hour
+            outf.loc[:, 'outflows'] = 1
+            outf.rename(columns={'start_station_id': 'station_id'}, inplace=True)
+            outf.drop('start_time', axis='columns', inplace=True)
+            outflows = outf.groupby(['station_id', 'date', 'hour']).sum().reset_index()
 
-        # Create total table
-        flows = pd.merge(inflows, outflows, on=['station_id', 'date', 'hour'])
+            # Create total table
+            flows = pd.merge(inflows, outflows, on=['station_id', 'date', 'hour'])
 
-        # Export to csv
-        flows.to_csv(path[1])
+            # Export to csv
+            flows.to_csv(path[1])
+    except FileNotFoundError:
+        logger.error("Multi-thread downloading did not complete as designed. Try specifying a lower '--thread' count "
+                     "and higher '--sleep_time' value and try again.")
+        sys.exit(1)
 
     # Consolidate all intermediate .csv files into one output file
     logger.info("Consolidating intermediate .csv files into trips .csv output.")

@@ -1,5 +1,6 @@
 import requests
 import os
+import logging.config
 import pandas as pd
 from src.bq_helper import BigQueryHelper
 import src.config as config

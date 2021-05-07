@@ -9,4 +9,3 @@ local:
   TRIPS_FILE_LOCATION: 'data/trips.csv'
   STATIONS_FILE_LOCATION: 'data/stations.csv'
   LOCAL_DB: 'data/msia423_db.db'
-seed: 1023

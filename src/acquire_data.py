@@ -1,13 +1,13 @@
 import sys
-from src.download_stations_data import download_stations_data
-from src.download_trips_data import download_trips_data
 import logging
+import logging.config
 import boto3
 import botocore.exceptions as botoexceptions
 from botocore.exceptions import ClientError
-
+from src.download_stations_data import download_stations_data
+from src.download_trips_data import download_trips_data
 import src.config as config
-import logging.config
+
 
 logging.config.fileConfig(fname=config.LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ Download Citi Bike stations data, trips data and writes all downloaded raw data 
 """
 
 
-def acquire_data(trips_only, s3_bucket, s3_directory):
+def acquire_data(trips_only, threads, sleep_time, s3_bucket, s3_directory):
     """
     runs all downloading scripts to generate all raw data and then writes them to s3 bucket by calling
     'writeRawToS3()' function
@@ -32,10 +32,10 @@ def acquire_data(trips_only, s3_bucket, s3_directory):
     """
     if trips_only == 'FALSE':
         download_stations_data()
-        download_trips_data()
+        download_trips_data(threads, sleep_time)
         writeRawToS3(s3_bucket, s3_directory)
     elif trips_only == 'TRUE':
-        download_trips_data()
+        download_trips_data(threads, sleep_time)
         writeRawToS3(s3_bucket, s3_directory)
     else:
         logger.error("--trips_only option misspecified. Please enter 'TRUE' or 'FALSE' and try again.")
