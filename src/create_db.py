@@ -44,5 +44,9 @@ def create_db(engine_string=config.SQLALCHEMY_DATABASE_URI):
         def __repr__(self):
             return '<Trips %r>' % self.title
 
+<<<<<<< HEAD
     logger.info("Creating databases using {}.".format(engine_string))
     Base.metadata.create_all(engine)
+=======
+    Base.metadata.create_all(engine)
+>>>>>>> 4a2bd48ceb1f24c561cb1a9fa927319bb97db7e8
