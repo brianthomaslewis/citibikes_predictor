@@ -46,7 +46,7 @@ TRIPS_SUFFIX_1 = '-citibike-tripdata.zip'
 TRIPS_SUFFIX_2 = '-citibike-tripdata.csv.zip'
 TRIPS_LABEL_CHUNK = 'citibikes_'
 TRIPS_THREADS = 8
-TRIPS_SLEEP_TIME = 200  # Seconds to sleep while downloading with threads
+TRIPS_SLEEP_TIME = 240  # Seconds to sleep while downloading with threads
 
 # AWS S3 Bucket and Object Names Setup #
 S3_BUCKETNAME = file_config['aws-s3']['S3_BUCKETNAME']
