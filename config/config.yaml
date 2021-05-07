@@ -1,0 +1,12 @@
+aws-s3:
+  S3_BUCKETNAME: "2021-msia423-lewis-brian"
+  S3_DIRECTORY: "raw/"
+  S3_STATIONS: "stations.csv"
+  S3_TRIPS: "trips.csv"
+local:
+  TRIPS_ZIP_LOCATION: 'data/trips_zip_data/'
+  TRIPS_CSV_LOCATION: 'data/trips_csv_data/'
+  TRIPS_FILE_LOCATION: 'data/trips.csv'
+  STATIONS_FILE_LOCATION: 'data/stations.csv'
+  LOCAL_DB: 'data/msia423_db.db'
+seed: 1023

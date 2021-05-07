@@ -1,15 +1,19 @@
 import logging
-import pandas as pd
 import sqlalchemy
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, MetaData, DateTime
-from config.flaskconfig import SQLALCHEMY_DATABASE_URI
+from sqlalchemy import Column, Integer, String, DateTime
+import src.config as config
 
 
-def create_db(SQLALCHEMY_DATABASE_URI):
+def create_db(engine_string=config.SQLALCHEMY_DATABASE_URI):
+    """
+    Creates database with data models inherited from Base and places raw data into databases.
+    Database configuration will depend on environment variables passed, and logic is in config.py
 
+    Returns: database created with data models.
+    """
     Base = declarative_base()
+    engine = sqlalchemy.create_engine(engine_string)  # set up sqlite connection
 
     class stations(Base):
         """Create a data model for the database to be set up for bike stations """
@@ -23,9 +27,6 @@ def create_db(SQLALCHEMY_DATABASE_URI):
         last_reported = Column(DateTime)
 
         def __repr__(self):
-            return '<Station %r>' % self.title
+            return '<Stations %r>' % self.title
 
-    # set up sqlite connection
-    engine = sqlalchemy.create_engine(SQLALCHEMY_DATABASE_URI)
-    # create the tracks table
     Base.metadata.create_all(engine)

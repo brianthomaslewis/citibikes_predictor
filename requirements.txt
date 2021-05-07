@@ -21,6 +21,7 @@ googleapis-common-protos
 setuptools
 sqlalchemy
 pymysql
+PyYAML
 requests~=2.25.1
 cryptography
 botocore~=1.20.66

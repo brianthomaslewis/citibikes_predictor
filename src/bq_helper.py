@@ -1,17 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
-"""
-Helper class to simplify common read-only BigQuery tasks.
-"""
-
-
-import pandas as pd
 import time
-
+import pandas as pd
 from google.cloud import bigquery
 
 
