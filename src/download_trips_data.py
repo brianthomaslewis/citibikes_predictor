@@ -136,7 +136,7 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
         sys.exit(1)
 
     # Open, process, aggregate, and save processed data.
-    logger.info("Attempting to process downloadeded .zip files into intermediate .csv files and saving to {}.".format(csv_data_path))
+    logger.info("Attempting to process downloaded .zip files into intermediate .csv files and saving to {}.".format(csv_data_path))
     try:
         for path in pr_paths:
             # Read in CSV and rename columns for ease of use
