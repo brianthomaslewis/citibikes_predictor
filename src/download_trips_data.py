@@ -66,6 +66,7 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
     urls = []
     pr_paths = []
     yrmo = []
+    # trips_df = []
 
     # Create iterables for batch downloading
 
@@ -170,18 +171,19 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
 
             # Export to csv
             flows.to_csv(path[1])
+            # trips_df.append(flows)
     except zipfile.BadZipFile as e:
         logger.error(e)
-        logger.error("Multi-thread downloading did not complete as designed. Try specifying a lower '--thread' count "
+        logger.error("Multi-thread downloading did not complete as designed. Try specifying a higher '--thread' count "
                      "and higher '--sleep_time' value and try again.")
         sys.exit(1)
 
     # Consolidate all intermediate .csv files into one output file
     logger.info("Consolidating intermediate .csv files into trips .csv output.")
     files = glob.glob(f'{csv_data_path}*.csv')
-    df = pd.concat((pd.read_csv(f, usecols=[1, 2, 3, 4, 5]) for f in files))
+    trips_df = pd.concat((pd.read_csv(f, usecols=[1, 2, 3, 4, 5]) for f in files))
 
-    df.to_csv(output_path, index=False)
+    trips_df.to_csv(output_path, index=False)
     logger.info("Success! Wrote Citi Bikes trip output to {}.".format(output_path))
 
     # Remove raw and intermediate data (if output performed correctly)

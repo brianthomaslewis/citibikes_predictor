@@ -16,6 +16,10 @@ if __name__ == '__main__':
 
     # Sub-parser for downloading raw data from Citi Bike and uploading to S3
     sb_download = subparsers.add_parser("download_raw_data", description="Download Citi Bike data and store in S3")
+    sb_download.add_argument("--month_start", default=config.YRMO_START,
+                             help="String in YYYYMM format of first month to download trips data")
+    sb_download.add_argument("--month_end", default=config.YRMO_END,
+                             help="String in YYYYMM format of last month to download trips data")
     sb_download.add_argument("--trips_only", default='FALSE', help="T/F Toggle for downloading only 'trips' dataset")
     sb_download.add_argument("--threads", default=config.TRIPS_THREADS,
                              help="Number of threads with which to download the data")
@@ -32,7 +36,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     sp_used = args.subparser_name
     if sp_used == 'download_raw_data':
-        acquire_data(args.trips_only, args.threads, args.sleep_time, args.s3_bucket, args.s3_directory)
+        acquire_data(args.month_start, args.month_end, args.trips_only, args.threads, args.sleep_time,
+                     args.s3_bucket, args.s3_directory)
     elif sp_used == 'create_db':
         create_db(args.engine_string)
     else:

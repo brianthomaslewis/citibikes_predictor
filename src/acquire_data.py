@@ -16,12 +16,14 @@ Download Citi Bike stations data, trips data and writes all downloaded raw data 
 """
 
 
-def acquire_data(trips_only, threads, sleep_time, s3_bucket, s3_directory):
+def acquire_data(month_start, month_end, trips_only, threads, sleep_time, s3_bucket, s3_directory):
     """
     runs all downloading scripts to generate all raw data and then writes them to s3 bucket by calling
     'writeRawToS3()' function
 
     Args:
+        month_start: String in YYYYMM format to indicate starting month. Earliest available month is 201306.
+        month_end: String in YYYYMM format to indicate ending month. Latest month available is 202103.
         trips_only: T/F toggle to indicate whether to only download "trips" data
         threads: Number of threads to use while downloading
         sleep_time: Number of seconds to sleep while performing multi-thread downloading.
@@ -33,10 +35,12 @@ def acquire_data(trips_only, threads, sleep_time, s3_bucket, s3_directory):
     """
     if trips_only == 'FALSE':
         download_stations_data()
-        download_trips_data(threads=int(threads), sleep_time=int(sleep_time))
+        download_trips_data(month_start=month_start, month_end=month_end,
+                            threads=int(threads), sleep_time=int(sleep_time))
         writeRawToS3(s3_bucket=s3_bucket, s3_directory=s3_directory)
     elif trips_only == 'TRUE':
-        download_trips_data(threads=int(threads), sleep_time=int(sleep_time))
+        download_trips_data(month_start=month_start, month_end=month_end,
+                            threads=int(threads), sleep_time=int(sleep_time))
         writeRawToS3(s3_bucket=s3_bucket, s3_directory=s3_directory)
     else:
         logger.error("--trips_only option misspecified. Please enter 'TRUE' or 'FALSE' and try again.")
