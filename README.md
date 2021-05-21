@@ -209,7 +209,7 @@ If you wish to save the data on another S3 bucket, specifying `--s3_bucket` will
 and you can omit the `-e GOOGLE_APPLICATION_CREDENTIALS` segment from the above `docker run` command, i.e.:*
 
 ```bash
-docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY citibikes-predictor run.py download_raw_data
+docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY citibikes-predictor run.py download_raw_data --trips_only TRUE
 ```
 
 
