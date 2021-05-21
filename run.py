@@ -1,4 +1,5 @@
 import argparse
+import sys
 import logging.config
 from src.acquire_data import acquire_data
 from src.create_db import create_db

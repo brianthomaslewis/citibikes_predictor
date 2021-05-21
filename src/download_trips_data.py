@@ -160,8 +160,9 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
             # Export to csv
             flows.to_csv(path[1])
             # trips_df.append(flows)
-    except zipfile.BadZipFile as e:
-        logger.error(e)
+
+    except Exception as err:
+        logger.error(err)
         logger.error("Multi-thread downloading did not complete as designed. Try specifying a higher '--thread' count "
                      "and higher '--sleep_time' value and try again.")
         sys.exit(1)
