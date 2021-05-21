@@ -191,9 +191,9 @@ The `download_raw_data` function also takes the following optional arguments:
 
 
 ```bash
---trips_only   <boolean TRUE/FALSE>
---s3_bucket    <name of bucket on S3>
---s3_directory <name of the directory within the S3 bucket to place data into>
+--trips_only   < boolean TRUE/FALSE >
+--s3_bucket    < name of bucket on S3 >
+--s3_directory < name of the directory within the S3 bucket to place data into >
 ```
 
 If no options are specified, the `stations` and `trips` raw data will be saved to `data/stations.csv` and `data/trips.csv`, 
