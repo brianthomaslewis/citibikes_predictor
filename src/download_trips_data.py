@@ -12,6 +12,7 @@ import pandas as pd
 from pathlib import Path
 from multiprocessing.pool import ThreadPool
 from src.bq_helper import BigQueryHelper
+from src.month_functions import to_month, iter_months
 import src.config as config
 
 logging.config.fileConfig(fname=config.LOGGING_CONFIG)
@@ -80,25 +81,12 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
 
         Returns: the file located at the above URL
 
-
         """
         f_path, url = url
         r = requests.get(url, stream=True)
         with open(f_path, 'wb') as f:
             for ch in r:
                 f.write(ch)
-
-    # Functions to produce YYYYMM strings to iterate over URL and filepaths for batch downloading
-    def to_month(yyyymm):
-        """Helper function to iterate through months"""
-        yr, mo = int(yyyymm[:4]), int(yyyymm[4:])
-        return yr * 12 + mo
-
-    def iter_months(start, end):
-        """Helper function to create YYYYMM objects"""
-        for month in range(to_month(start), to_month(end) + 1):
-            yr, mo = divmod(month - 1, 12)
-            yield yr, mo + 1  # for 12 % 12 == 0
 
     # Create list 'yrmo' with all desired dates in YYYYMM format
     for y, m in iter_months(month_start, month_end):
@@ -130,7 +118,7 @@ def download_trips_data(month_start=config.YRMO_START, month_end=config.YRMO_END
         logger.info("Downloading raw Citi Bike files from months {} to {} using {} threads to {}. "
                     "Sleep time during multi-thread download: {} seconds.".format(month_start, month_end, threads,
                                                                                   zip_data_path, sleep_time))
-        sleep(sleep_time)
+        sleep(sleep_time)  # Sleeping to give device sufficient time to download files.
     except requests.exceptions.ConnectionError as e:
         logger.error(e)
         logger.error("Could not connect. Try checking your internet connection and trying again.")

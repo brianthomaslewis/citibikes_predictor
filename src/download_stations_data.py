@@ -32,14 +32,12 @@ def download_stations_data(stations_output_path=config.STATIONS_FILE_LOCATION, b
     nyc_bikes = BigQueryHelper(active_project=bq_project_name,
                                dataset_name=bq_dataset)
 
-    query1 = query
-
     try:
         logger.info("Attempting to query Google BigQuery for Citi Bike stations data.")
-        response1 = nyc_bikes.query_to_pandas_safe(query1, max_gb_scanned=25)
+        response = nyc_bikes.query_to_pandas_safe(query, max_gb_scanned=25)
     except requests.exceptions.ConnectionError:
         logger.error("There was a connection error to Google BigQuery. Please try again or verify the query.")
         sys.exit(1)
 
-    response1.to_csv(stations_output_path, index=False)
+    response.to_csv(stations_output_path, index=False)
     logger.info("Success! Wrote Citi Bike stations data to {}.".format(stations_output_path))

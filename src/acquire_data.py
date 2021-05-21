@@ -47,33 +47,6 @@ def acquire_data(month_start, month_end, trips_only, threads, sleep_time, s3_buc
         sys.exit(1)
 
 
-def upload_file(file_name, bucket, directory, file_suffix):
-    """
-    Uploads file to S3 bucket as specified in arguments.
-
-    Args:
-        file_name: File to upload
-        bucket: S3 Bucket to upload to
-        directory: Directory within S3 Bucket to load data to
-        file_suffix: Last section of S3 url for data about to be written.
-
-    Returns: None (performs uploading task to S3).
-
-    """
-    object_name = f'{directory}{file_suffix}'
-
-    # If S3 object_name was not specified, use file_name
-    if object_name is None:
-        object_name = file_name
-
-    # Upload the file
-    s3_client = boto3.client('s3')
-    try:
-        s3_client.upload_file(file_name, bucket, object_name)
-    except ClientError as e:
-        logging.error(e)
-
-
 def writeRawToS3(s3_bucket=config.S3_BUCKETNAME, s3_directory=config.S3_DIRECTORY):
     """
     writes all the files from acquire_data() to S3 bucket specified in config.py
@@ -92,12 +65,38 @@ def writeRawToS3(s3_bucket=config.S3_BUCKETNAME, s3_directory=config.S3_DIRECTOR
         logger.error("Your AWS credentials were not found. Verify that they have been "
                      "made available as detailed in readme instructions")
         sys.exit(1)
+    except Exception as e:
+        logger.error(e)
+        logger.error("Unable to connect to s3. Verify your AWS credentials and connection and try again.")
+        sys.exit(1)
 
     logger.info("Writing files to S3.")
 
+    def upload_file(file_name, bucket, directory, file_suffix):
+        """
+        Uploads file to S3 bucket as specified in arguments.
+
+        Args:
+            file_name: File to upload
+            bucket: S3 Bucket to upload to
+            directory: Directory within S3 Bucket to load data to
+            file_suffix: Last section of S3 url for data about to be written.
+
+        Returns: None (performs uploading task to S3).
+
+        """
+        object_name = f'{directory}{file_suffix}'
+
+        # If S3 object_name was not specified, use file_name
+        if object_name is None:
+            object_name = file_name
+
+        # Upload the file
+        s3_client = boto3.client('s3')
+        try:
+            s3_client.upload_file(file_name, bucket, object_name)
+        except ClientError as err:
+            logging.error(err)
+
     upload_file(config.STATIONS_FILE_LOCATION, s3_bucket, s3_directory, config.S3_STATIONS)
     upload_file(config.TRIPS_FILE_LOCATION, s3_bucket, s3_directory, config.S3_TRIPS)
-
-
-if __name__ == '__main__':
-    acquire_data()
