@@ -1,41 +1,44 @@
 import argparse
-
 import logging.config
-logging.config.fileConfig('config/logging/local.conf')
-logger = logging.getLogger('penny-lane-pipeline')
+from src.acquire_data import acquire_data
+from src.create_db import create_db
+import src.config as config
 
-from src.add_songs import TrackManager, create_db
-from config.flaskconfig import SQLALCHEMY_DATABASE_URI
+# Logger information
+logging.config.fileConfig(config.LOGGING_CONFIG, disable_existing_loggers=False)
+logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
 
-    # Add parsers for both creating a database and adding songs to it
-    parser = argparse.ArgumentParser(description="Create and/or add data to database")
+    # Add parsers for both creating a database and adding data to it
+    parser = argparse.ArgumentParser(description="Run components of the source code")
     subparsers = parser.add_subparsers(dest='subparser_name')
 
-    # Sub-parser for creating a database
-    sb_create = subparsers.add_parser("create_db", description="Create database")
-    sb_create.add_argument("--engine_string", default=SQLALCHEMY_DATABASE_URI,
-                           help="SQLAlchemy connection URI for database")
+    # Sub-parser for downloading raw data from Citi Bike and uploading to S3
+    sb_download = subparsers.add_parser("download_raw_data", description="Download Citi Bike data and store in S3")
+    sb_download.add_argument("--month_start", default=config.YRMO_START,
+                             help="String in YYYYMM format of first month to download trips data")
+    sb_download.add_argument("--month_end", default=config.YRMO_END,
+                             help="String in YYYYMM format of last month to download trips data")
+    sb_download.add_argument("--trips_only", default='FALSE', help="T/F Toggle for downloading only 'trips' dataset")
+    sb_download.add_argument("--threads", default=config.TRIPS_THREADS,
+                             help="Number of threads with which to download the data")
+    sb_download.add_argument("--sleep_time", default=config.TRIPS_SLEEP_TIME,
+                             help="Number of seconds to pause code while multi-thread download is occurring")
+    sb_download.add_argument("--s3_bucket", default=config.S3_BUCKETNAME, help="s3 bucket name")
+    sb_download.add_argument("--s3_directory", default=config.S3_DIRECTORY, help="s3 bucket directory to write file to")
 
-    # Sub-parser for ingesting new data
-    sb_ingest = subparsers.add_parser("ingest", description="Add data to database")
-    sb_ingest.add_argument("--artist", default="Emancipator", help="Artist of song to be added")
-    sb_ingest.add_argument("--title", default="Minor Cause", help="Title of song to be added")
-    sb_ingest.add_argument("--album", default="Dusk to Dawn", help="Album of song being added")
-    sb_ingest.add_argument("--engine_string", default='sqlite:///data/tracks.db',
-                           help="SQLAlchemy connection URI for database")
+    # Sub-parser for creating a database
+    sb_create_db = subparsers.add_parser("create_db", description="Creates a database in RDS/locally with raw data")
+    sb_create_db.add_argument("--engine_string", default=config.SQLALCHEMY_DATABASE_URI,
+                              help="Manually specified engine location.")
 
     args = parser.parse_args()
     sp_used = args.subparser_name
-    if sp_used == 'create_db':
+    if sp_used == 'download_raw_data':
+        acquire_data(args.month_start, args.month_end, args.trips_only, args.threads, args.sleep_time,
+                     args.s3_bucket, args.s3_directory)
+    elif sp_used == 'create_db':
         create_db(args.engine_string)
-    elif sp_used == 'ingest':
-        tm = TrackManager(engine_string=args.engine_string)
-        tm.add_track(args.title, args.artist, args.album)
-        tm.close()
     else:
         parser.print_help()
-
-
-
