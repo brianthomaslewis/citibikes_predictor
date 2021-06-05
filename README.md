@@ -43,15 +43,15 @@ To allow tourists or residents in NYC the ability to obtain reasonable predictio
 
 To provide an app that will allow the user to input the following:
 
- * Date (in the past or the future)
- * Time of day
- * Location
+ - Date (in the past or the future)
+ - Time of day
+ - Location
 
 And obtain the following:
 
- * Top 5 closest Citi Bike stations to the location entered
- * Actual average number of available bicycles at each of the top 5 stations at that time interval (if past date in existing data)
- * Predicted average number of available bicycles at each of the top 5 stations at that time interval (if future date not in existing data)
+ - Top 5 closest Citi Bike stations to the location entered
+ - Actual average number of available bicycles at each of the top 5 stations at that time interval (if past date in existing data)
+ - Predicted average number of available bicycles at each of the top 5 stations at that time interval (if future date not in existing data)
 
 The predictions will be created after testing a variety of methods for performance, but will likely result from using Holt-Winters forecasting methods.
 
@@ -66,14 +66,14 @@ Citi Bike Trips Data source: [NYC Citi Bike Trips](https://s3.amazonaws.com/trip
 
 Model performance metric:
 
- * The model will succeed if it can predict the number of available bikes at a given bike station, date, and time of day with a cross-validation R^2 of 0.7. 
+ - The model will succeed if it can predict the number of available bikes at a given bike station, date, and time of day with a cross-validation R^2 of 0.7. 
 
 Business metrics:
 
- * Ratio of Citi Bike rental conversion between:
-   * Those who only visited the Citi Bike "real-time availability" page
-   * Those who visited the Citi Bike "real-time availability" page AND used the app
- * Ratio of similar bike availability levels across all Citi Bike stations (e.g. we expect to see more similar bicycle distribution across all Citi Bike stations resulting from greater use of planning app to arbitrage high-availability locations)
+ - Ratio of Citi Bike rental conversion between:
+   - Those who only visited the Citi Bike "real-time availability" page
+   - Those who visited the Citi Bike "real-time availability" page AND used the app
+ - Ratio of similar bike availability levels across all Citi Bike stations (e.g. we expect to see more similar bicycle distribution across all Citi Bike stations resulting from greater use of planning app to arbitrage high-availability locations)
 
 
 ## Directory structure 
@@ -140,17 +140,17 @@ Before downloading the raw Citibikes data, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCE
 should be environmental variables in your current terminal session. They can be specified by the following steps for 
 either **repeated use** ***or*** **one-time use**.
 
-*  AWS Credentials (**repeated use**):
-    *  Modify `config/.awsconfig` to include your `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` credentials 
-    *  Run the following code from the root of this repository to source and verify your AWS credentials:
+-  AWS Credentials (**repeated use**):
+    -  Modify `config/.awsconfig` to include your `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` credentials 
+    -  Run the following code from the root of this repository to source and verify your AWS credentials:
 ```bash
 source config/.awsconfig
 echo $AWS_ACCESS_KEY_ID
 echo $AWS_SECRET_ACCESS_KEY
 ````
 
-*  AWS Credentials (**one-time use**):
-    *  Run the following code from the root of this repository to create and verify your AWS credentials:
+-  AWS Credentials (**one-time use**):
+    -  Run the following code from the root of this repository to create and verify your AWS credentials:
 ```bash
 export AWS_ACCESS_KEY_ID     = <Your AWS access key ID>
 export AWS_SECRET_ACCESS_KEY = <Your AWS secret access key>
@@ -159,18 +159,18 @@ echo $AWS_ACCESS_KEY_ID
 echo $AWS_SECRET_ACCESS_KEY
 ```    
 
-*  Google BigQuery Credentials (**repeated use**):
-    *  If you have not already, create a Google Cloud service account key (in the form of a .json file) following the instructions here: https://cloud.google.com/docs/authentication/getting-started
-    *  Modify `config/.bigqueryconfig` to include the full .json credentials file path as `GOOGLE_APPLICATION_CREDENTIALS`.
-    *  Run the following code from the root of this repository to source and verify your Google BigQuery credentials file path:
+-  Google BigQuery Credentials (**repeated use**):
+    -  If you have not already, create a Google Cloud service account key (in the form of a .json file) following the instructions here: https://cloud.google.com/docs/authentication/getting-started
+    -  Modify `config/.bigqueryconfig` to include the full .json credentials file path as `GOOGLE_APPLICATION_CREDENTIALS`.
+    -  Run the following code from the root of this repository to source and verify your Google BigQuery credentials file path:
 ```bash
 source config/.bigqueryconfig
 echo $GOOGLE_APPLICATION_CREDENTIALS
 ```
 
-*  Google BigQuery Credentials (**one-time use**):
-    *  If you have not already, create a Google Cloud service account key (in the form of a .json file) following the instructions here: https://cloud.google.com/docs/authentication/getting-started
-    *  Run the following code from the root of this repository to create and verify your Google BigQuery credentials file path:
+-  Google BigQuery Credentials (**one-time use**):
+    -  If you have not already, create a Google Cloud service account key (in the form of a .json file) following the instructions here: https://cloud.google.com/docs/authentication/getting-started
+    -  Run the following code from the root of this repository to create and verify your Google BigQuery credentials file path:
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS = <file path to Google service account key .json> 
 echo $GOOGLE_APPLICATION_CREDENTIALS
@@ -186,10 +186,7 @@ In order to acquire the `stations` and `trips` raw data and upload them to an S3
 docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e GOOGLE_APPLICATION_CREDENTIALS citibikes-predictor run.py download_raw_data
 ```
 
-
 The `download_raw_data` function also takes the following optional arguments:
-
-
 
 ```bash
 --trips_only   <boolean TRUE/FALSE>
@@ -204,16 +201,12 @@ and `s3://2021-msia423-lewis-brian/raw/trips.csv`, respectively.
 
 If you wish to save the data on another S3 bucket, specifying `--s3_bucket` will allow you to do so.
 
-
 **By default, `--trips_only` is set to `FALSE`, but if you specify it to `TRUE`, no Google BigQuery credentials are required, 
 and you can omit the `-e GOOGLE_APPLICATION_CREDENTIALS` segment from the above `docker run` command, i.e.:*
 
 ```bash
 docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY citibikes-predictor run.py download_raw_data --trips_only TRUE
 ```
-
-
-
 
 ### 4. Initialize the database on RDS (or locally)
 
@@ -222,40 +215,40 @@ Before trying to create a database on RDS, you will need to *first log in to Nor
 Next, we will first need to follow a similar pattern as above for 
 setting environmental variables for either **repeated use** ***or*** **one-time use**. 
 
-*  For **repeated use**:
-   *  Modify `config/.sqlconfig` to include your `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_HOST`, `MYSQL_PORT`, 
-       and `DATABASE_NAME` variables.
-   *  Run the following code from the root of this repository to source and verify your MySQL environmental variables:
+-  For **repeated use**:
+   -  Modify `config/.sqlconfig` to include your `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_HOST`, `MYSQL_PORT`, 
+       and `MYSQL_DATABASE` variables.
+   -  Run the following code from the root of this repository to source and verify your MySQL environmental variables:
 ```bash
 source config/.sqlconfig
 echo $MYSQL_USER
 echo $MYSQL_PASSWORD
 echo $MYSQL_HOST
 echo $MYSQL_PORT
-echo $DATABASE_NAME
+echo $MYSQL_DATABASE
 ```   
 
-*  For **one-time use**: 
-   *  Run the following code from the root of this repository to create and verify your MySQL environmental variables:
+-  For **one-time use**: 
+   -  Run the following code from the root of this repository to create and verify your MySQL environmental variables:
 ```bash
 export MYSQL_USER     = <Your MySQL username>
 export MYSQL_PASSWORD = <Your MySQL password>
 export MYSQL_HOST     = <Your MySQL RDS host>
 export MYSQL_PORT     = <Your MySQL port>
-export DATABASE_NAME  = <Your MySQL database name>
+export MYSQL_DATABASE  = <Your MySQL database name>
 
 echo $MYSQL_USER
 echo $MYSQL_PASSWORD
 echo $MYSQL_HOST
 echo $MYSQL_PORT
-echo $DATABASE_NAME
+echo $MYSQL_DATABASE
 ```
 
 Once these variables have been set, they can be passed in to the Docker image with the `create_db` function to create the
 database as shown in the code here:
 
 ```bash
-docker run -e MYSQL_HOST -e MYSQL_PORT -e MYSQL_USER -e MYSQL_PASSWORD -e DATABASE_NAME citibikes-predictor run.py create_db
+docker run -e MYSQL_HOST -e MYSQL_PORT -e MYSQL_USER -e MYSQL_PASSWORD -e MYSQL_DATABASE citibikes-predictor run.py create_db
 ```
 
 Alternatively, the database can be placed in a different location than RDS by specifying the `--engine_string` argument:

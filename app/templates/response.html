@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>citibike_predictor</title>
+
+    <style>
+        .center {
+            text-align: center;
+        }
+
+        .center-img {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+          width: 40%;
+          margin-top: 50px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h3>
+        <b> Predicted Number of Available Bikes: {{ results }} </b> <br>
+        <br>
+         Time: {{ hour }}:00<br>
+         Day: {{ date }}<br>
+         Citi Bike Station: {{ station }} <br>
+        <br>
+
+            <img src="{{url_for('static', filename='day-passes.png')}}"
+         alt="Citi Bikes in NYC" height="520" class="center-img">
+
+        <br>
+
+        <a href = "{{ url_for('selection') }}">Return to Citi Bike Availability Predictor</a>
+    </h3>
+</body>
+</html>
