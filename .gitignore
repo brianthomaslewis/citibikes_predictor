@@ -7,8 +7,6 @@ __pycache__/
 .log
 .ipynb_checkpoints/
 data/*
-!data/sample/
-!data/external/
 config/local
 !.gitkeep
 # Explicitly list JSON export from Google BigQuery credentials and data snippets for grading
