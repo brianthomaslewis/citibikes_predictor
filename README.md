@@ -296,7 +296,7 @@ by executing the following command from this directory:
 docker run -p 5000:5000 --name citibike citibikes-predictor
 ```
 
-If you created the database elsewhere but would still like to run the app locally, you can run this container locally
+If you created the database elsewhere (like an RDS instance) but would still like to run the app, you can run this container in your terminal
 by executing the following command from this directory:
 
 ```bash
