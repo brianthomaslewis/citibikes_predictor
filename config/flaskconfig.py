@@ -15,7 +15,8 @@ DB_USER = os.environ.get('MYSQL_USER')
 DB_PW = os.environ.get('MYSQL_PASSWORD')
 DATABASE = os.environ.get('MYSQL_DATABASE')
 DB_DIALECT = 'mysql+pymysql'
-SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
+SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI'
+                                         )
 if SQLALCHEMY_DATABASE_URI is not None:
     pass
 elif DB_HOST is None:

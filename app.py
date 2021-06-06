@@ -8,8 +8,8 @@ from wtforms.ext.sqlalchemy.fields import QuerySelectField
 from flask import render_template, request, redirect, url_for
 from src.create_db import Predictions, BikeManager
 
-# Set up secret key
-SECRET_KEY = os.urandom(32)
+# Set up randomly generated number for WTF forms syntax
+randomly_generated_number = os.urandom(32)
 
 # Initialize the Flask application
 app = Flask(__name__, template_folder="app/templates", static_folder="app/static")
@@ -18,7 +18,6 @@ app = Flask(__name__, template_folder="app/templates", static_folder="app/static
 app.config.from_pyfile('config/flaskconfig.py')
 
 # Define LOGGING_CONFIG in flask_config.py - path to config file for setting
-# up the logger (e.g. config/logging/local.conf)
 logging.config.fileConfig(app.config["LOGGING_CONFIG"])
 logger = logging.getLogger(app.config["APP_NAME"])
 logger.debug('Web app log')
@@ -55,9 +54,10 @@ def selection():
             station = form.data['stations']
             date = form.data['dates']
             hour = form.data['hours']
-            results = [i[0] for i in bike_manager.session.query(Predictions.pred_num_bikes). \
-                        filter_by(name=station, date=date, hour=hour).all()][0]
-            # return '<h1>{}, {}, {}, {} <h1> '.format(station, date, hour, results)
+            results = [i[0] for i in bike_manager.session.query(Predictions.pred_num_bikes).filter_by(name=station,
+                                                                                                      date=date,
+                                                                                                      hour=hour
+                                                                                                      ).all()][0]
             return render_template('response.html', station=station, date=date, hour=hour, results=results)
 
         return render_template('selection.html', form=form)
@@ -69,5 +69,5 @@ def selection():
 
 
 if __name__ == '__main__':
-    app.config['SECRET_KEY'] = SECRET_KEY
+    app.config['SECRET_KEY'] = randomly_generated_number
     app.run(debug=app.config["DEBUG"], port=app.config["PORT"], host=app.config["HOST"])

@@ -2,7 +2,7 @@ download_stations_data:
   url: 'https://feeds.citibikenyc.com/stations/stations.json'
   stations_output_path: 'data/stations.csv'
   s3_bucket: "2021-msia423-lewis-brian"
-  s3_directory: "raw/"
+  s3_directory: "data/"
   engine_string:
 
 download_trips_data:
@@ -18,7 +18,7 @@ download_trips_data:
   sleep_time: 120
   output_path: 'data/trips.csv'
   s3_bucket: "2021-msia423-lewis-brian"
-  s3_directory: "raw/"
+  s3_directory: "data/"
 
 data_acquisition:
   s3_bucket: "2021-msia423-lewis-brian"
@@ -27,17 +27,17 @@ data_acquisition:
 download_csv_s3:
   trips_data:
     s3_bucket_name: '2021-msia423-lewis-brian'
-    bucket_dir_path: 'raw/'
+    bucket_dir_path: 'data/'
     input_filename: 'trips.csv'
     output_filename: 'data/from_s3/trips.csv'
   stations_data:
     s3_bucket_name: '2021-msia423-lewis-brian'
-    bucket_dir_path: 'raw/'
+    bucket_dir_path: 'data/'
     input_filename: 'stations.csv'
     output_filename: 'data/from_s3/stations.csv'
 
 upload_to_s3:
-  s3_directory: 'raw/'
+  s3_directory: 'data/'
 
 fetch_local_data:
   trips_data_path: "data/trips.csv"
@@ -74,4 +74,4 @@ arima_fit_params:
 model_run:
   prediction_path: 'data/predictions.csv'
   mape_path: 'data/predictions_mape.csv'
-  bucket_dir_path: 'raw/'
+  bucket_dir_path: 'data/'

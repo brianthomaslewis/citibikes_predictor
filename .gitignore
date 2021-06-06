@@ -2,12 +2,12 @@ __pycache__/
 *.pyc
 *.py[cod]
 *.class
+*copilot/
 .DS_Store
 .idea/
 .log
 .ipynb_checkpoints/
 data/*
+!data/sample
 config/local
 !.gitkeep
-# Explicitly list JSON export from Google BigQuery credentials and data snippets for grading
-./config/local/bigquery_credentials.json

@@ -6,7 +6,6 @@ PORT = 5000
 APP_NAME = "citibikes-predictor"
 HOST = "0.0.0.0"
 SQLALCHEMY_ECHO = False  # If true, SQL for queries made will be printed
-MAX_ROWS_SHOW = 100
 
 # Getting the parent directory of this file. That will function as the project home.
 PROJECT_HOME = path.dirname(path.dirname(path.abspath(__file__)))
