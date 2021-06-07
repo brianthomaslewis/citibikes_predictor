@@ -10,30 +10,17 @@
 - [Project Charter](#project-charter)
 - [Directory structure](#directory-structure)
 - [Running the model pipeline in Docker](#running-the-model-pipeline-in-Docker)
-
   * [1. Connect to Northwestern VPN](#1-connect-to-northwestern-vpn)
-
   * [2. Configure Resources in Docker](#2-configure-resources-in-docker)
-
   * [3. Set AWS credentials and source required environmental variables](#3-set-aws-credentials-and-source-required-environmental-variables)
-    
   * [4. Build the Pipeline Docker Image](#4-build-the-pipeline-docker-image)
-    
   * [5. Run the model pipeline in Docker](#5-run-the-model-pipeline-in-docker)
-
 - [Running the app in Docker](#running-the-app-in-docker)
-
   * [1. Connect to Northwestern VPN](#1-connect-to-northwestern-vpn)
-
   * [2. Configure Flask App](#2-configure-flask-app)
-
   * [3. Build the Image](#3-build-the-image)
-    
   * [4. Run the Container](#4-run-the-container)
-    
   * [5. Killing the Container](#5-killing-the-container)
-
-  * [Workaround for potential Docker problem for Windows.](#workaround-for-potential-docker-problem-for-windows)
 
 <!-- tocstop -->
 
