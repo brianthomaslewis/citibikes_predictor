@@ -9,21 +9,31 @@
 
 - [Project Charter](#project-charter)
 - [Directory structure](#directory-structure)
-- [Running the app](#running-the-app)
-  * [1. Initialize the database](#1-initialize-the-database)
-    + [Create the database with a single song](#create-the-database-with-a-single-song)
-    + [Adding additional songs](#adding-additional-songs)
-    + [Defining your engine string](#defining-your-engine-string)
-      - [Local SQLite database](#local-sqlite-database)
-  * [2. Configure Flask app](#2-configure-flask-app)
-  * [3. Run the Flask app](#3-run-the-flask-app)
-- [Running the app in Docker](#running-the-app-in-docker)
-  * [1. Build the image](#1-build-the-image)
-  * [2. Run the container](#2-run-the-container)
-  * [3. Kill the container](#3-kill-the-container)
-  * [Workaround for potential Docker problem for Windows.](#workaround-for-potential-docker-problem-for-windows)
+- [Running the model pipeline in Docker](#running-the-model-pipeline-in-Docker)
 
-(TOC will be updated through time)
+  * [1. Connect to Northwestern VPN](#1-connect-to-northwestern-vpn)
+
+  * [2. Configure Resources in Docker](#2-configure-resources-in-docker)
+
+  * [3. Set AWS credentials and source required environmental variables](#3-set-aws-credentials-and-source-required-environmental-variables)
+    
+  * [4. Build the Pipeline Docker Image](#4-build-the-pipeline-docker-image)
+    
+  * [5. Run the model pipeline in Docker](#5-run-the-model-pipeline-in-docker)
+
+- [Running the app in Docker](#running-the-app-in-docker)
+
+  * [1. Connect to Northwestern VPN](#1-connect-to-northwestern-vpn)
+
+  * [2. Configure Flask App](#2-configure-flask-app)
+
+  * [3. Build the Image](#3-build-the-image)
+    
+  * [4. Run the Container](#4-run-the-container)
+    
+  * [5. Killing the Container](#5-killing-the-container)
+
+  * [Workaround for potential Docker problem for Windows.](#workaround-for-potential-docker-problem-for-windows)
 
 <!-- tocstop -->
 
@@ -113,7 +123,7 @@ Business metrics:
 ├── requirements.txt                  <- Python package dependencies 
 
 ```
-## Running acquisition, processing, and modeling pipeline in Docker
+## Running the model pipeline in Docker
 (NOTE: Use of this all Docker images require the use of Python 3.6 or higher. 
 Versions below Python 3.6 may produce unforeseen errors and should not be used.)
 
@@ -205,7 +215,7 @@ echo $S3_BUCKET
 Once these enviromental variables have been set and implemented, you should be able to run the below Docker commands to 
 download, upload, process, and model the Citi Bikes data.
 
-### 4. Build the Docker image 
+### 4. Build the pipeline Docker image 
 
 The Dockerfile for running the pipeline is in the root of this directory. To build the image, 
 run from the root of this repository: 
@@ -218,7 +228,7 @@ This command builds the Docker image, with the name (tag) `citibikes-predictor-b
 It uses the instructions in `Dockerfile_Bash` and relies on the files existing in this directory.
  
 
-### 5. Download raw Citi Bikes data, upload to S3 bucket, process, and model
+### 5. Run the model pipeline in Docker
 
 In order to run the full pipeline from downloading to modeling, run the following code from the root of the repository:
 
@@ -257,9 +267,8 @@ docker run --mount type=bind,source="$(pwd)"/data,target=/src/data  -e AWS_ACCES
 (NOTE: Use of this all Docker images require the use of Python 3.6 or higher. 
 Versions below Python 3.6 may produce unforeseen errors and should not be used.)
 
-### 1. Connect to Northwestern VPN
-Before completing any other steps, please first connect to the Northwestern VPN. Without a connection to the Northwestern VPN, 
-other steps in the pipeline process may not work as designed.
+### 1. Connect to Northwestern VPN (if not already done previously)
+If you haven't already, [connect to Northwestern VPN](#1-connect-to-northwestern-vpn).
 
 ### 2. Configure Flask App
 `config/flaskconfig.py` holds the configurations for the Flask app. It includes the following configurations.
@@ -287,7 +296,7 @@ docker build -f app/Dockerfile_App -t citibikes-predictor .
 This command builds the Docker image, with the tag `citibikes-predictor`, based on the instructions in 
 app/Dockerfile_App, and the files existing in this directory.
 
-### 4. Run the Container Locally
+### 4. Run the Container
 
 If you created the database locally in `data/msia423_db.db`, you can run this container locally
 by executing the following command from this directory:
