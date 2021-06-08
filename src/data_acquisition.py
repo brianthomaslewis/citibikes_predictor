@@ -1,24 +1,21 @@
-import sys
+"""Download Citi Bike stations data, trips data and writes all from_s3 raw data to s3 as well"""
 import logging
-import argparse
-import yaml
-from botocore.exceptions import ClientError
 from src.data_download_stations import download_stations_data
 from src.data_download_trips import download_trips_data
 
 # Logging
 logger = logging.getLogger(__name__)
 
-"""Download Citi Bike stations data, trips data and writes all from_s3 raw data to s3 as well"""
-
 
 def acquire_data(arguments):
     """
-    Wrapper function that retrieves data from NYC Bike Feed API and Citi Bikes S3 bucket and then writes
+    Wrapper function that retrieves data from NYC Bike Feed
+    API and Citi Bikes S3 bucket and then writes
     them to s3 bucket as specified in arguments
 
     Args:
-        arguments: From argparse, should contain arguments.config and optionally, the following arguments:
+        arguments: From argparse, should contain arguments.config
+        and optionally, the following arguments:
             config (obj) : A config object
             s3_bucket (str): S3 bucket name passed in as a string
             engine_string (str): SQLAlchemy engine string
@@ -33,12 +30,14 @@ def acquire_data(arguments):
 
     # Run download_stations_data
     download_stations_data(url=config['download_stations_data']['url'],
-                           stations_output_path=config['download_stations_data']['stations_output_path'],
+                           stations_output_path=
+                           config['download_stations_data']['stations_output_path'],
                            s3_bucket=arguments.s3_bucket,
                            s3_directory=config['download_stations_data']['s3_directory'],
                            engine_string=arguments.engine_string)
     logger.info("Success! Downloaded stations data locally to '%s' and on s3 to '%s'",
-                config['download_stations_data']['stations_output_path'], config['download_stations_data']['s3_bucket'])
+                config['download_stations_data']['stations_output_path'],
+                config['download_stations_data']['s3_bucket'])
 
     # Run download_trips_data
     download_trips_data(month_start=config['download_trips_data']['month_start'],
@@ -55,4 +54,5 @@ def acquire_data(arguments):
                         s3_bucket=arguments.s3_bucket,
                         s3_directory=config['download_trips_data']['s3_directory'])
     logger.info("Success! Downloaded trips data locally to '%s' and on s3 to '%s'",
-                config['download_trips_data']['output_path'], config['download_trips_data']['s3_bucket'])
+                config['download_trips_data']['output_path'],
+                config['download_trips_data']['s3_bucket'])

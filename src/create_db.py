@@ -1,5 +1,6 @@
+"""Sets data models for database setup, creates database using engine string"""
 import logging
-import argparse
+import sys
 import sqlalchemy
 import pymysql
 from sqlalchemy.ext.declarative import declarative_base
@@ -14,8 +15,6 @@ logger = logging.getLogger(__name__)
 # Set base class
 Base = declarative_base()
 
-"""Sets data models for database setup, creates database using engine string"""
-
 
 class BikeStock(Base):
     """Create a data model for the database to be set up for bike stock data """
@@ -29,8 +28,10 @@ class BikeStock(Base):
     stock = Column(Integer, unique=False, nullable=True)
 
     def __repr__(self):
-        return "<BikeStock(station_id='%r', date='%r', hour='%r', name='%r', latitude='%r', longitude='%r', " \
-               "stock='%r')>" % (self.station_id, self.date, self.hour, self.name, self.latitude,
+        return "<BikeStock(station_id='%r', date='%r', hour='%r', " \
+               "name='%r', latitude='%r', longitude='%r', " \
+               "stock='%r')>" % (self.station_id, self.date,
+                                 self.hour, self.name, self.latitude,
                                  self.longitude, self.stock)
 
 
@@ -62,13 +63,15 @@ class Stations(Base):
     last_reported = Column(DateTime, unique=False, nullable=True)
 
     def __repr__(self):
-        return "<Stations(station_id='%r', name='%r', latitude='%r', longitude='%r', capacity='%r', num_bikes='%r', " \
-               "last_reported='%r')>" % (self.station_id, self.name, self.latitude, self.longitude, self.capacity,
+        return "<Stations(station_id='%r', name='%r', latitude='%r', " \
+               "longitude='%r', capacity='%r', num_bikes='%r', " \
+               "last_reported='%r')>" % (self.station_id, self.name,
+                                         self.latitude, self.longitude, self.capacity,
                                          self.num_bikes, self.last_reported)
 
 
 class BikeManager:
-
+    """Manager for bikes data model."""
     def __init__(self, app=None, engine_string=None):
         """
         Args:
@@ -109,8 +112,8 @@ def create_db(args):
         Base.metadata.create_all(engine)
         logger.info("Success! Database tables have been created at %s", args.engine_string)
 
-    except pymysql.err.OperationalError as e:
-        logger.error(e)
+    except pymysql.err.OperationalError as err_msg:
+        logger.error(err_msg)
         logger.error("Could not connect to the specified MySQL server. "
                      "Verify your connection is on the Northwestern VPN before retrying.")
         sys.exit(1)

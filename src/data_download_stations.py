@@ -1,7 +1,6 @@
-import os
+"""Downloads 'stations' data from NYC city .json feed and places them in S3 bucket."""
 import sys
 import logging
-import requests
 import json
 from urllib.request import urlopen
 import pandas as pd
@@ -47,23 +46,23 @@ def download_stations_data(url, stations_output_path, s3_bucket, s3_directory, e
         logger.info('Preview of the stations data: ')
         print(response.head())
 
-    except ConnectionError as e:
+    except ConnectionError as err_msg:
         logger.error("There was a connection error to the NYC Citi Bike stations .json feed. "
                      "Please verify the URL and try again.")
-        logger.error(e)
+        logger.error(err_msg)
         sys.exit(1)
 
     # Add stations data to local output
     response.to_csv(stations_output_path, index=False)
-    logger.info("Success! Wrote Citi Bike stations data to local filepath '%s'.", stations_output_path)
+    logger.info("Success! Wrote Citi Bike stations data to local filepath '%s'.",
+                stations_output_path)
 
     # Add stations data to S3 bucket
     upload_to_s3(stations_output_path, s3_bucket, s3_directory)
-    logger.info("Success! Wrote Citi Bike stations data to '%s' S3 bucket in '%s' folder.", s3_bucket, s3_directory)
+    logger.info("Success! Wrote Citi Bike stations data to '%s' S3 bucket in "
+                "'%s' folder.", s3_bucket, s3_directory)
 
     # Add pared-down stations data to MySQL database
     response_trimmed = response[['station_id', 'name', 'latitude', 'longitude']]
     add_to_database(response_trimmed, "stations", 'replace', engine_string)
     logger.info("Success! Wrote Citi Bike stations data to MySQL database.")
-
-

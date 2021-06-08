@@ -35,6 +35,11 @@ download_csv_s3:
     bucket_dir_path: 'data/'
     input_filename: 'stations.csv'
     output_filename: 'data/from_s3/stations.csv'
+  bike_stock_data:
+    s3_bucket_name: '2021-msia423-lewis-brian'
+    bucket_dir_path: 'data/'
+    input_filename: 'bike_stock.csv'
+    output_filename: 'data/from_s3/bike_stock.csv'
 
 upload_to_s3:
   s3_directory: 'data/'

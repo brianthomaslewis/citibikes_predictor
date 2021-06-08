@@ -1,13 +1,8 @@
-import sys
+"""Script to take acquired data and run processing and modeling functions"""
 import logging
 import logging.config
-import yaml
 import argparse
-import pandas as pd
-import numpy as np
 import src.config as connection_config
-from src.helper_db import add_to_database
-from src.helper_s3 import download_csv_s3, upload_to_s3
 from src.data_processing import run_data_processing
 from src.model_run import run_train_models
 
@@ -17,12 +12,11 @@ logging.config.fileConfig("config/logging/local.conf",
 logger = logging.getLogger(__name__)
 logging.getLogger("run_modeling")
 
-"""Script to take acquired data and run processing and modeling functions"""
-
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Get citi bikes data from s3 and prep for modeling')
-    parser.add_argument('--config', '-c', default='config/config.yaml', help='path to yaml file with configurations')
+    parser = argparse.ArgumentParser(description='Get citi bikes data '
+                                                 'from s3 and prep for modeling')
+    parser.add_argument('--config', '-c', default='config/config.yaml',
+                        help='path to yaml file with configurations')
     parser.add_argument("--engine_string", default=connection_config.SQLALCHEMY_DATABASE_URI,
                         help="Manually specified engine location.")
     parser.add_argument("--local", dest='local_flag', action='store_true',

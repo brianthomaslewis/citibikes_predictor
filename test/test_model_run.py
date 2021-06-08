@@ -1,11 +1,13 @@
-from datetime import datetime
+"""Tests for model_run.py module."""
 import pytest
 import pandas as pd
 from src.model_run import model_fun
 
 
 def test_model_fun():
-    df = pd.read_csv('data/sample/sample_bike_stock.csv')
+    """Test for model_fun happy path."""
+
+    dataframe = pd.read_csv('data/sample/sample_bike_stock.csv')
     start_date_args = {'year': 2021, 'month': 4, 'day': 1, 'hour': 0, 'minute': 00}
     end_date_args = {'year': 2021, 'month': 4, 'day': 1, 'hour': 8, 'minute': 00}
     model_params = {'p': 1, 'd': 0, 'q': 0}
@@ -29,13 +31,16 @@ def test_model_fun():
 
     expected_mape = pd.DataFrame({'Station': [72], 'MAPE': [28.99973384558673]})
 
-    output, mape = model_fun(df, start_date_args, end_date_args, model_params, optional_fit_args)
+    output, mape = model_fun(dataframe, start_date_args, end_date_args,
+                             model_params, optional_fit_args)
 
     assert expected_output.equals(output), expected_mape.equals(mape)
 
 
 def test_model_fun_unhappy():
-    df = pd.read_csv('data/sample/sample_bike_stock.csv')
+    """Test for model_fun unhappy path."""
+
+    dataframe = pd.read_csv('data/sample/sample_bike_stock.csv')
     start_date_args = {'year': 2021, 'month': 4, 'day': 1, 'hour': 0, 'minute': 00}
     end_date_args = {'year': 2021, 'month': 4, 'day': 1, 'hour': 8, 'minute': 00}
     model_params = {'p': 1, 'd': 0, 'q': 0}
@@ -59,6 +64,7 @@ def test_model_fun_unhappy():
 
     expected_mape = pd.DataFrame({'Station': [72], 'MAPE': [28.99973384558673]})
 
-    output, mape = model_fun(df, start_date_args, end_date_args, model_params, optional_fit_args)
+    output, mape = model_fun(dataframe, start_date_args, end_date_args,
+                             model_params, optional_fit_args)
 
     assert not expected_output.equals(output), expected_mape.equals(mape)

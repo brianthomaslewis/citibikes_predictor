@@ -1,3 +1,4 @@
+"""Helper function to deal with interfacing with S3 bucket on AWS."""
 import sys
 import logging.config
 import logging
@@ -31,9 +32,10 @@ def upload_to_s3(file_local_path, s3_bucket, s3_directory):
         sys.exit(1)
     except FileNotFoundError:
         logger.error('Please verify the path you inputted contains the correct data file.')
-    except Exception as e:
-        logger.error(e)
-        logger.error("Unable to connect to s3. Verify your AWS credentials and connection and try again.")
+    except ConnectionError as con_e:
+        logger.error(con_e)
+        logger.error("Unable to connect to s3. Verify your AWS credentials "
+                     "and connection and try again.")
         sys.exit(1)
 
     logger.info("Writing files to S3.")
@@ -44,13 +46,14 @@ def upload_to_s3(file_local_path, s3_bucket, s3_directory):
     s3_client = boto3.client('s3')
     try:
         s3_client.upload_file(file_local_path, s3_bucket, s3_file_path)
-    except ClientError as err:
+    except botoexceptions.ClientError as err:
         logging.error(err)
 
 
 def download_csv_s3(s3_bucket_name, bucket_dir_path, input_filename, output_filename):
     """
-    Obtains selected .csv file from s3 bucket, downloads it to output_filename, and returns a dataframe
+    Obtains selected .csv file from s3 bucket, downloads it to output_filename,
+        and returns a dataframe
     Args:
         s3_bucket_name (str): the name of S3 bucket containing data of interest
         bucket_dir_path (str): s3 bucket file path where data is located
@@ -65,7 +68,8 @@ def download_csv_s3(s3_bucket_name, bucket_dir_path, input_filename, output_file
         s3 = boto3.client("s3")
     except botoexceptions.NoCredentialsError:
         logger.error("Your AWS credentials were not found. "
-                     "Verify that they have been passed to the environment as instructed in README.")
+                     "Verify that they have been passed to the environment "
+                     "as instructed in README.")
         sys.exit(1)
 
     # If filename specified, pull the requisite data
@@ -74,11 +78,12 @@ def download_csv_s3(s3_bucket_name, bucket_dir_path, input_filename, output_file
             s3_file = os.path.join(bucket_dir_path, input_filename)
             logger.debug("user inputted file path:%s", s3_file)
             s3.download_file(s3_bucket_name, s3_file, output_filename)
-        except botoexceptions.ClientError as e:
-            if e.response['Error']['Code'] == "404":
+        except botoexceptions.ClientError as err:
+            if err.response['Error']['Code'] == "404":
                 logger.error("The object does not exist. Verify path and filename.")
             else:
-                logger.error("Unexpected error trying to retrieve s3 object. %s", e.response['Error'])
+                logger.error("Unexpected error trying to retrieve s3 object. %s",
+                             err.response['Error'])
             sys.exit(1)
 
     # If filename not specified, require the user to input filename
@@ -93,9 +98,10 @@ def download_csv_s3(s3_bucket_name, bucket_dir_path, input_filename, output_file
     except TypeError:
         logger.error("")
     except ValueError:
-        logger.error("Selected file in s3 directory is not in CSV form. Please respecify the file and try again")
+        logger.error("Selected file in s3 directory is not in CSV form. "
+                     "Please respecify the file and try again")
         sys.exit(1)
-    except Exception as error:
+    except AttributeError as error:
         logger.error("Unexpected error in parsing s3 data: %s:%s", type(error).__name__, error)
         sys.exit(1)
 
