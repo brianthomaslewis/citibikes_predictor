@@ -21,7 +21,7 @@
   * [2. Configure Flask App](#2-configure-flask-app)
   * [3. Build the Image](#3-build-the-image)
   * [4. Run the Container](#4-run-the-container)
-  * [5. Killing the Container](#5-killing-the-container)
+  * [5. Kill the Container](#5-kill-the-container)
 
 <!-- tocstop -->
 
@@ -357,7 +357,7 @@ docker run -e SQLALCHEMY_DATABASE_URI -p 5000:5000 --name citibike citibikes-pre
 
 You should now be able to access the app at http://0.0.0.0:5000/ in your browser.
 
-### 5. Killing the Container
+### 5. Kill the Container
 
 If you are done using the app, you can kill the container running the app in a different terminal with the following command:
 
