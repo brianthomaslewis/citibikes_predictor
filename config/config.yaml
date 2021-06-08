@@ -1,11 +1,81 @@
-aws-s3:
-  S3_BUCKETNAME: "2021-msia423-lewis-brian"
-  S3_DIRECTORY: "raw/"
-  S3_STATIONS: "stations.csv"
-  S3_TRIPS: "trips.csv"
-local:
-  TRIPS_ZIP_LOCATION: 'data/trips_zip_data/'
-  TRIPS_CSV_LOCATION: 'data/trips_csv_data/'
-  TRIPS_FILE_LOCATION: 'data/trips.csv'
-  STATIONS_FILE_LOCATION: 'data/stations.csv'
-  LOCAL_DB: 'data/msia423_db.db'
+download_stations_data:
+  url: 'https://feeds.citibikenyc.com/stations/stations.json'
+  stations_output_path: 'data/stations.csv'
+  s3_bucket: "2021-msia423-lewis-brian"
+  s3_directory: "data/"
+  engine_string:
+
+download_trips_data:
+  month_start: '202003'  # data begin in 201306
+  month_end: '202103'  # data end in 202103
+  zip_data_path: 'data/trips_zip_data/'
+  csv_data_path: 'data/trips_csv_data/'
+  url_stem: 'https://s3.amazonaws.com/tripdata/'
+  suffix_1: '-citibike-tripdata.zip'
+  suffix_2: '-citibike-tripdata.csv.zip'
+  label_chunk: 'citibikes_'
+  threads: 10
+  sleep_time: 120
+  output_path: 'data/trips.csv'
+  s3_bucket: "2021-msia423-lewis-brian"
+  s3_directory: "data/"
+
+data_acquisition:
+  s3_bucket: "2021-msia423-lewis-brian"
+  engine_string:
+
+download_csv_s3:
+  trips_data:
+    s3_bucket_name: '2021-msia423-lewis-brian'
+    bucket_dir_path: 'data/'
+    input_filename: 'trips.csv'
+    output_filename: 'data/from_s3/trips.csv'
+  stations_data:
+    s3_bucket_name: '2021-msia423-lewis-brian'
+    bucket_dir_path: 'data/'
+    input_filename: 'stations.csv'
+    output_filename: 'data/from_s3/stations.csv'
+
+upload_to_s3:
+  s3_directory: 'data/'
+
+fetch_local_data:
+  trips_data_path: "data/trips.csv"
+  stations_data_path: "data/stations.csv"
+
+process_bike_data:
+  rebalancing_proportion: 0.65
+  output_file: 'data/bike_stock.csv'
+
+forecast_date_range:
+  start_date:
+    year: 2021
+    month: 4
+    day: 1
+    hour: 0
+    minute: 00
+  end_date:
+    year: 2021
+    month: 8
+    day: 4
+    hour: 0
+    minute: 00
+
+arima_params:
+  p: 1
+  d: 0
+  q: 0
+
+arima_fit_params:
+  trend: 'c'
+  method: 'css-mle'
+  solver: 'lbfgs'
+
+model_run:
+  prediction_path: 'data/predictions.csv'
+  mape_path: 'data/predictions_mape.csv'
+  bucket_dir_path: 'data/'
+
+read_db:
+  bike_stock: ['station_id','date','name','latitude','longitude','stock']
+  stations: ['station_id','name','latitude','longitude','capacity','num_bikes_available','last_reported']
