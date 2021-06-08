@@ -1,9 +1,9 @@
-import requests
-from urllib.request import urlopen
-import json
 import os
 import sys
 import logging
+import requests
+import json
+from urllib.request import urlopen
 import pandas as pd
 from src.helper_db import add_to_database
 from src.helper_s3 import upload_to_s3
@@ -47,7 +47,7 @@ def download_stations_data(url, stations_output_path, s3_bucket, s3_directory, e
         logger.info('Preview of the stations data: ')
         print(response.head())
 
-    except Exception as e:
+    except ConnectionError as e:
         logger.error("There was a connection error to the NYC Citi Bike stations .json feed. "
                      "Please verify the URL and try again.")
         logger.error(e)

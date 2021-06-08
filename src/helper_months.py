@@ -9,6 +9,7 @@ def to_month(yyyymm):
     Returns:
         (str): A combined str representing the year-month combination for iterating in the following function
     """
+    # Extracts year and month from string
     yr, mo = int(yyyymm[:4]), int(yyyymm[4:])
     return yr * 12 + mo
 
@@ -23,12 +24,13 @@ def iter_months(start, end):
         yr (int): A calculated int representing the year for iterating
         mo (int): A calculated int representing the month for iterating
     """
+    # Create range of months
     for month in range(to_month(start), to_month(end) + 1):
         yr, mo = divmod(month - 1, 12)
         yield yr, mo + 1  # for 12 % 12 == 0
 
 
-def date_range(start_date, end_date):
+def date_range_hours(start_date, end_date):
     """
     Helper function to create hourly timestamp increments between two dates
     Args:
@@ -37,6 +39,7 @@ def date_range(start_date, end_date):
     Returns:
         (timestamp): A calculated int representing the year for iterating
     """
+    # Create hourly timestamps
     delta = timedelta(hours=1)
     while start_date < end_date:
         yield start_date

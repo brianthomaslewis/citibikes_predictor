@@ -9,9 +9,10 @@ from src.data_acquisition import acquire_data
 import src.config as connection_config
 
 # Logging
-logging.basicConfig(format='%(asctime)s %(name)-28s %(levelname)-8s %(message)s',
-                    level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+logging.config.fileConfig("config/logging/local.conf",
+                          disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
+logging.getLogger("run_acquisition")
 
 
 """Run full acquisition script to create database, download data, and acquire it into S3"""

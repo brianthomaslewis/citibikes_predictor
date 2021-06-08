@@ -5,7 +5,7 @@ import logging
 import sqlalchemy as sql
 from sqlalchemy import exc
 import pandas as pd
-import config
+import src.config as config
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ def get_engine_string():
     Return:
         engine_string (str): sqlalchemy string for the connection. Can be RDS or local depending on inputs in config.py
     """
+    # Obtain engine string from SQLALCHEMY_DATABASE_URI
     engine_string = config.SQLALCHEMY_DATABASE_URI
     logging.debug("engine string: %s" % engine_string)
     return engine_string
@@ -32,6 +33,7 @@ def get_engine(engine_string=None):
     Returns:
         engine (sqlalchemy.engine.base.Engine): sqlalchemy engine for database of interest
     """
+    # Deduce whether RDS or Local DB is being used
     if engine_string is None:
         if config.HOST is not None:
             logger.debug("RDS is being used")
@@ -80,6 +82,26 @@ def add_to_database(df, table_name, if_exists_condition, engine_string=None):
         sys.exit(1)
 
 
+def read_all_data_from_db(table, engine_string=None):
+    """
+    Retrieve data from MySQL database locally or in RDS
+    Args:
+        table (str): table from which to query database
+        engine_string (str): sqlalchemy string for the connection.
+    Returns:
+        df (pandas DataFrame): DataFrame of covid19 data retrieved from MySQL database
+    """
+
+    # get sqlalchemy engine
+    engine = get_engine(engine_string)
+
+    # query the database
+    query = f"""SELECT * FROM {table} """
+    df = get_data_from_database(query, engine_string)
+
+    return df
+
+
 def get_data_from_database(query, engine_string=None):
     """
     Retrieve data from a MySQL database on local machine or RDS
@@ -89,7 +111,7 @@ def get_data_from_database(query, engine_string=None):
     Returns:
         df (pandas DataFrame): DataFrame containing results from input query
     """
-
+    # Obtain data from database
     if engine_string is None:
         engine_string = get_engine_string()
         engine = sql.create_engine(engine_string)

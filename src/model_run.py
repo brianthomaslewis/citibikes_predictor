@@ -1,41 +1,21 @@
-import pandas as pd
-import numpy as np
-import warnings
-import argparse
-import yaml
-import logging
 import sys
 import os
+import logging
+import warnings
+import argparse
 from datetime import datetime
+import yaml
+import pandas as pd
+import numpy as np
 from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 from sklearn.model_selection import TimeSeriesSplit
-from src.helper_months import date_range
-from src.helper_db import get_engine, add_to_database, get_data_from_database
+from src.helper_months import date_range_hours
+from src.helper_db import get_engine, add_to_database, read_all_data_from_db
 from src.helper_s3 import upload_to_s3
 
 # Logging
 logger = logging.getLogger(__name__)
-
-
-def read_data_from_db(table, engine_string=None):
-    """
-    Retrieve data from MySQL database locally or in RDS
-    Args:
-        table (str): table from which to query database
-        engine_string (str): sqlalchemy string for the connection.
-    Returns:
-        df (pandas DataFrame): DataFrame of covid19 data retrieved from MySQL database
-    """
-
-    # get sqlalchemy engine
-    engine = get_engine(engine_string)
-
-    # query the database
-    query = f"""SELECT * FROM {table} """
-    df = get_data_from_database(query, engine_string)
-
-    return df
 
 
 def model_fun(df, start_date_args, end_date_args, model_params, optional_fit_args):
@@ -65,12 +45,14 @@ def model_fun(df, start_date_args, end_date_args, model_params, optional_fit_arg
     # Generate forecast time range (default is until August 4 at midnight)
     start_date = datetime(**start_date_args)
     end_date = datetime(**end_date_args)
-    for single_date in date_range(start_date, end_date):
+    for single_date in date_range_hours(start_date, end_date):
         date_time_list.append(single_date.strftime("%Y-%m-%d %H:%M"))
 
     # for each station in the list, attempt to build an ARIMA model for forecasting
     warnings.filterwarnings("ignore")  # specify to try to ignore warning messages from ARIMA models
     warnings.simplefilter('ignore', ConvergenceWarning)
+    logger.warning('Running ARIMA model; many station-level outcomes may result in '
+                   '"The problem is unconstrained" output.')
     for station in station_list:
 
         # subset dataframe to station of interest
@@ -119,17 +101,27 @@ def model_fun(df, start_date_args, end_date_args, model_params, optional_fit_arg
             pass
 
     # Create a dataframe of predictions by station, date, and hour
-    predictions = pd.DataFrame(dict_list)
-    predictions['date_time'] = pd.to_datetime(predictions['date_time'])
-    predictions['date'] = predictions['date_time'].dt.date
-    predictions['hour'] = predictions['date_time'].dt.hour
-    predictions_output = predictions[['station_id', 'date', 'hour', 'pred_num_bikes']]
+    try:
+        predictions = pd.DataFrame(dict_list)
+        predictions['date_time'] = pd.to_datetime(predictions['date_time'])
+        predictions['date'] = predictions['date_time'].dt.date
+        predictions['hour'] = predictions['date_time'].dt.hour
+        predictions_output = predictions[['station_id', 'date', 'hour', 'pred_num_bikes']]
+    except ValueError as e:
+        logging.error('ARIMA model structure formatted incorrectly. Check values of stations included.')
+        logging.error(e)
+        sys.exit(1)
 
     # Create a dataframe of MAPE by station
-    station_mapes_df = pd.DataFrame({'Station': stations_w_models, 'MAPE': mapes_station_arima})
-    no_model_stations = len(station_list) - len(station_mapes_df)
-    logger.info("Station models trained. Models could not be generated for %s stations "
-                "due to lack of data.", no_model_stations)
+    try:
+        station_mapes_df = pd.DataFrame({'Station': stations_w_models, 'MAPE': mapes_station_arima})
+        no_model_stations = len(station_list) - len(station_mapes_df)
+        logger.info("Station models trained. Models could not be generated for %s stations "
+                    "due to lack of data.", no_model_stations)
+    except TypeError as e:
+        logging.warning('Stations unable to run, check for -Inf MAPE values and try again.')
+        logging.warning(e)
+        sys.exit(1)
 
     return predictions_output, station_mapes_df
 
@@ -154,7 +146,7 @@ def run_train_models(args):
 
     # get station level data, train station forecasting models
     logger.info('Reading in time series "bike_stock" data from database at %s...', args.engine_string)
-    station_data = read_data_from_db('bike_stock', args.engine_string)
+    station_data = read_all_data_from_db('bike_stock', args.engine_string)
     logger.info("Training models for each station, this will take a few moments.")
     logger.warning("You may see some warnings issued from the ARIMA fit. Due to the nature of the data for some "
                    "stations, the fit/optimization algorithm encounters issues.")
@@ -165,7 +157,7 @@ def run_train_models(args):
                                            optional_fit_args=config['arima_fit_params'])
 
     # Append station-level characteristics to predictions table
-    stations_data = read_data_from_db('stations', args.engine_string)
+    stations_data = read_all_data_from_db('stations', args.engine_string)
     prediction_df = pd.merge(predictions, stations_data, how='left')
     prediction_df = prediction_df[['station_id', 'name', 'latitude', 'longitude', 'date', 'hour', 'pred_num_bikes']]. \
         sort_values(['longitude', 'latitude'], ascending=(True, False))
@@ -176,13 +168,16 @@ def run_train_models(args):
 
     # Save station-level MAPE to local file
     station_mapes.to_csv(config['model_run']['mape_path'], index=False)
-    logger.info('Success! Added predictions data locally to: "%s"', config['model_run']['mape_path'])
+    logger.info('Success! Added predictions evaluation data locally to: "%s"', config['model_run']['mape_path'])
 
-    # Save predictions to S3
+    # Save predictions and performance metrics to S3
     upload_to_s3(file_local_path=config['model_run']['prediction_path'],
                  s3_bucket=args.s3_bucket,
                  s3_directory=config['model_run']['bucket_dir_path'])
-    logger.info('Success! Added predictions data to the "%s" S3 bucket in the "%s" folder.',
+    upload_to_s3(file_local_path=config['model_run']['mape_path'],
+                 s3_bucket=args.s3_bucket,
+                 s3_directory=config['model_run']['bucket_dir_path'])
+    logger.info('Success! Added predictions and performance metrics data to the "%s" S3 bucket in the "%s" folder.',
                 args.s3_bucket, config['model_run']['bucket_dir_path'])
 
     # Save predictions to Database

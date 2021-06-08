@@ -75,3 +75,7 @@ model_run:
   prediction_path: 'data/predictions.csv'
   mape_path: 'data/predictions_mape.csv'
   bucket_dir_path: 'data/'
+
+read_db:
+  bike_stock: ['station_id','date','name','latitude','longitude','stock']
+  stations: ['station_id','name','latitude','longitude','capacity','num_bikes_available','last_reported']

@@ -7,7 +7,8 @@ __pycache__/
 .idea/
 .log
 .ipynb_checkpoints/
-data/*
+data/*.csv
+data/from_s3/trips.csv
 !data/sample
 config/local
 !.gitkeep

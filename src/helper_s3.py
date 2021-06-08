@@ -1,9 +1,9 @@
-import boto3
 import sys
-import botocore.exceptions as botoexceptions
 import logging.config
 import logging
 import os
+import boto3
+import botocore.exceptions as botoexceptions
 import pandas as pd
 
 # Logging
@@ -22,13 +22,15 @@ def upload_to_s3(file_local_path, s3_bucket, s3_directory):
     Returns: none (writes files to S3)
 
     """
-
+    # Try checking for S3 client
     try:
         s3 = boto3.resource("s3")
     except botoexceptions.NoCredentialsError:
         logger.error("Your AWS credentials were not found. Verify that they have been "
                      "made available as detailed in readme instructions")
         sys.exit(1)
+    except FileNotFoundError:
+        logger.error('Please verify the path you inputted contains the correct data file.')
     except Exception as e:
         logger.error(e)
         logger.error("Unable to connect to s3. Verify your AWS credentials and connection and try again.")
@@ -71,7 +73,6 @@ def download_csv_s3(s3_bucket_name, bucket_dir_path, input_filename, output_file
         try:
             s3_file = os.path.join(bucket_dir_path, input_filename)
             logger.debug("user inputted file path:%s", s3_file)
-            # s3_obj = s3.get_object(s3_bucket_name, s3_file)
             s3.download_file(s3_bucket_name, s3_file, output_filename)
         except botoexceptions.ClientError as e:
             if e.response['Error']['Code'] == "404":

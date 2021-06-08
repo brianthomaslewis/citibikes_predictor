@@ -1,9 +1,9 @@
-import pandas as pd
-import numpy as np
 import sys
 import logging
 import yaml
 import argparse
+import pandas as pd
+import numpy as np
 from src.helper_db import add_to_database
 from src.helper_s3 import download_csv_s3, upload_to_s3
 
@@ -11,6 +11,7 @@ from src.helper_s3 import download_csv_s3, upload_to_s3
 logger = logging.getLogger(__name__)
 
 """Functions to process bike data and shape it for modeling"""
+
 
 def process_bike_data(trips_df, stations_df, rebalancing_prop):
     """
@@ -71,7 +72,7 @@ def run_data_processing(arguments):
         arguments: From argparse:
            config (str): Path to yaml file with containing relevant configurations
            engine_string (str): sqlalchemy engine string
-           s3_flag (bool): the flag used to determine if the scripts will read/write via s3 or local
+           local_flag (bool): the flag used to determine if the scripts will read/write via s3 or local
            s3_bucket (str): name of the S3 bucket to pull data from
     Returns:
         None -- this a wrapper function for the data preparation steps
@@ -83,8 +84,18 @@ def run_data_processing(arguments):
         logger.error("Could not read in the config file--verify correct filename/path.")
         sys.exit(1)
 
-    # If --s3 flag activated, download from S3
-    if arguments.s3_flag:
+    # If --local flag activated, download from local
+    if arguments.local_flag:
+        trips = pd.read_csv(config['fetch_local_data']['trips_data_path'])
+        logger.info('Successfully retrieved trips data from local at "%s"',
+                    config['fetch_local_data']['trips_data_path'])
+        stations = pd.read_csv(config['fetch_local_data']['stations_data_path'])
+        logger.info('Successfully retrieved stations data from local at "%s"',
+                    config['fetch_local_data']['stations_data_path'])
+
+    # Otherwise, open up from local
+    else:
+        logger.info('Retrieving data from S3 at %s', arguments.s3_bucket)
         trips = download_csv_s3(s3_bucket_name=arguments.s3_bucket,
                                 bucket_dir_path=config['download_csv_s3']['trips_data']['bucket_dir_path'],
                                 input_filename=config['download_csv_s3']['trips_data']['input_filename'],
@@ -93,15 +104,6 @@ def run_data_processing(arguments):
                                    bucket_dir_path=config['download_csv_s3']['stations_data']['bucket_dir_path'],
                                    input_filename=config['download_csv_s3']['stations_data']['input_filename'],
                                    output_filename=config['download_csv_s3']['stations_data']['output_filename'])
-
-    # Otherwise, open up from local
-    else:
-        trips = pd.read_csv(config['fetch_local_data']['trips_data_path'])
-        logger.info('Successfully retrieved trips data from local at "%s"',
-                    config['fetch_local_data']['trips_data_path'])
-        stations = pd.read_csv(config['fetch_local_data']['stations_data_path'])
-        logger.info('Successfully retrieved stations data from local at "%s"',
-                    config['fetch_local_data']['stations_data_path'])
 
     # Begin processing bike data
     logger.info('Processing trips and stations data for modeling...')
@@ -115,8 +117,8 @@ def run_data_processing(arguments):
     upload_to_s3(file_local_path=config['process_bike_data']['output_file'],
                  s3_bucket=arguments.s3_bucket,
                  s3_directory=config['upload_to_s3']['s3_directory'])
-    logger.info('Success! Added bike_stock data to the "%s" S3 bucket in the "%s" folder.',
-                arguments.s3_bucket, config['upload_to_s3']['s3_directory'])
+    logger.info('Success! Added bike_stock data to the "%s" folder in the "%s" S3 bucket .',
+                config['upload_to_s3']['s3_directory'], arguments.s3_bucket)
 
     # Save bike_stock data to database
     try:
@@ -126,7 +128,7 @@ def run_data_processing(arguments):
                     arguments.engine_string)
         logger.info("data_processing.py was run successfully.")
 
-    except Exception as e:
+    except ValueError as e:
         logger.error('Bikes data unable to be added to "bike_stock" database. Try checking the dimensions of the data'
                      'and try again.')
         logger.error(e)

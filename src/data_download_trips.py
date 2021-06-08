@@ -1,13 +1,13 @@
 import os
+from time import sleep
+import logging
+import datetime
+import requests
 import glob
 import csv
 import itertools
 import zipfile
-import datetime
 import shutil
-import logging
-from time import sleep
-import requests
 import pandas as pd
 from pathlib import Path
 from multiprocessing.pool import ThreadPool
