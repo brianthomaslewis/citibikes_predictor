@@ -14,7 +14,7 @@
   * [2. Configure Resources in Docker](#2-configure-resources-in-docker)
   * [3. Set AWS credentials and source required environmental variables](#3-set-aws-credentials-and-source-required-environmental-variables)
   * [4. Build the Pipeline Docker Images](#4-build-and-run-the-data-acquisition-pipeline-in-docker)
-  * [5. Run the pipeline in Dockers](#5-build-and-run-the-modeling-acquisition-pipeline-in-docker)
+  * [5. Run the pipeline in Dockers](#5-build-and-run-the-modeling-pipeline-in-docker)
   * [6. A note on environmental variables in the Docker commands](#6-a-note-on-environmental-variables-in-the-above-docker-commands)  
 - [Running the app in Docker](#running-the-app-in-docker)
   * [1. Connect to Northwestern VPN](#1-connect-to-northwestern-vpn)
@@ -243,7 +243,7 @@ In order to run the **data acquisition** image you just built, run the following
 docker run --mount type=bind,source="$(pwd)"/data,target=/src/data  -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e S3_BUCKET -e SQLALCHEMY_DATABASE_URI citibikes-predictor-acquire
 ``` 
 
-### 5. Build and run the modeling acquisition pipeline in Docker
+### 5. Build and run the modeling pipeline in Docker
 
 **NOTE**: Before proceeding, it is important to know that due to the size of the raw data, necessary data processing, and memory requirements needed to complete the 
 acquisition and modeling process, expect these next two commands to take up to 10 minutes to finish executing. If after running this code for several
@@ -267,7 +267,7 @@ It uses the instructions in `Dockerfile_Model` and relies on the files existing 
 
 #### Running the modeling image
 
-Similarly, in order to run the **modeling** image you just built in [Step 4](#4-build-the-pipeline-docker-images), run the following code from the root of the repository:
+Similarly, in order to run the **modeling** image you just built above, run the following code from the root of the repository:
 
 
 ```bash
