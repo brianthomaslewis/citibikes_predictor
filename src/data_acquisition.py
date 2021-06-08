@@ -1,18 +1,15 @@
 import sys
 import logging
-import logging.config
 import argparse
 import yaml
 from botocore.exceptions import ClientError
-from data_download_stations import download_stations_data
-from data_download_trips import download_trips_data
-import config as connection_config
+from src.data_download_stations import download_stations_data
+from src.data_download_trips import download_trips_data
 
+# Logging
 logger = logging.getLogger(__name__)
 
-"""
-Download Citi Bike stations data, trips data and writes all from_s3 raw data to s3 as well
-"""
+"""Download Citi Bike stations data, trips data and writes all from_s3 raw data to s3 as well"""
 
 
 def acquire_data(arguments):
@@ -59,23 +56,3 @@ def acquire_data(arguments):
                         s3_directory=config['download_trips_data']['s3_directory'])
     logger.info("Success! Downloaded trips data locally to '%s' and on s3 to '%s'",
                 config['download_trips_data']['output_path'], config['download_trips_data']['s3_bucket'])
-
-
-if __name__ == '__main__':
-    try:
-        with open('config/config.yaml', "r") as f:
-            config_obj = yaml.load(f, Loader=yaml.FullLoader)
-    except IOError:
-        logger.error("Could not read in the config file--verify correct filename/path.")
-        sys.exit(1)
-    parser = argparse.ArgumentParser(description='Acquire stations and trips data from the web')
-    parser.add_argument('--config', '-c', default=config_obj, help='path to yaml file with configurations')
-    parser.add_argument("--threads", default=config_obj['download_trips_data']['threads'], help="s3 bucket name")
-    parser.add_argument("--sleep_time", default=config_obj['download_trips_data']['sleep_time'], help="s3 bucket name")
-    parser.add_argument("--s3_bucket", default=connection_config.S3_BUCKET, help="s3 bucket name")
-    parser.add_argument("--engine_string", default=connection_config.SQLALCHEMY_DATABASE_URI,
-                        help="Manually specified engine location.")
-
-    args = parser.parse_args()
-    acquire_data(args)
-    logger.info("data_acquisition.py was run successfully.")

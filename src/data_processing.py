@@ -1,16 +1,16 @@
 import pandas as pd
 import numpy as np
 import sys
-import logging.config
+import logging
 import yaml
 import argparse
-from helper_db import add_to_database
-import config as connection_config
-from helper_s3 import download_csv_s3, upload_to_s3
+from src.helper_db import add_to_database
+from src.helper_s3 import download_csv_s3, upload_to_s3
 
 # Logging
 logger = logging.getLogger(__name__)
 
+"""Functions to process bike data and shape it for modeling"""
 
 def process_bike_data(trips_df, stations_df, rebalancing_prop):
     """
@@ -84,7 +84,7 @@ def run_data_processing(arguments):
         sys.exit(1)
 
     # If --s3 flag activated, download from S3
-    if args.s3_flag:
+    if arguments.s3_flag:
         trips = download_csv_s3(s3_bucket_name=arguments.s3_bucket,
                                 bucket_dir_path=config['download_csv_s3']['trips_data']['bucket_dir_path'],
                                 input_filename=config['download_csv_s3']['trips_data']['input_filename'],
@@ -103,6 +103,8 @@ def run_data_processing(arguments):
         logger.info('Successfully retrieved stations data from local at "%s"',
                     config['fetch_local_data']['stations_data_path'])
 
+    # Begin processing bike data
+    logger.info('Processing trips and stations data for modeling...')
     bike_df = process_bike_data(trips, stations, config['process_bike_data']['rebalancing_proportion'])
 
     # Save bike_stock data locally
@@ -118,26 +120,14 @@ def run_data_processing(arguments):
 
     # Save bike_stock data to database
     try:
-        logger.info('Attempting to add bike stock data to database')
+        logger.info('Attempting to add bike stock data to database at %s...', arguments.engine_string)
         add_to_database(bike_df, "bike_stock", 'replace', arguments.engine_string)
         logger.info('Success! Added data to "bike_stock" table at the following engine_string: %s',
                     arguments.engine_string)
         logger.info("data_processing.py was run successfully.")
 
-    except Exception(e):
+    except Exception as e:
         logger.error('Bikes data unable to be added to "bike_stock" database. Try checking the dimensions of the data'
                      'and try again.')
         logger.error(e)
         sys.exit(1)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Get citi bikes data from s3 and prep for modeling')
-    parser.add_argument('--config', '-c', default='config/config.yaml', help='path to yaml file with configurations')
-    parser.add_argument("--engine_string", default=connection_config.SQLALCHEMY_DATABASE_URI,
-                        help="Manually specified engine location.")
-    parser.add_argument("--s3", dest='s3_flag', action='store_true',
-                        help="Use arg if you want to load from s3 rather than locally.")
-    parser.add_argument("--s3_bucket", default=connection_config.S3_BUCKET, help="s3 bucket name")
-    args = parser.parse_args()
-    run_data_processing(args)

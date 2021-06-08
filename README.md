@@ -9,12 +9,13 @@
 
 - [Project Charter](#project-charter)
 - [Directory structure](#directory-structure)
-- [Running the model pipeline in Docker](#running-the-model-pipeline-in-Docker)
+- [Running the model pipeline in Docker](#running-the-data-acquisition-and-model-pipelines-in-docker)
   * [1. Connect to Northwestern VPN](#1-connect-to-northwestern-vpn)
   * [2. Configure Resources in Docker](#2-configure-resources-in-docker)
   * [3. Set AWS credentials and source required environmental variables](#3-set-aws-credentials-and-source-required-environmental-variables)
-  * [4. Build the Pipeline Docker Image](#4-build-the-pipeline-docker-image)
-  * [5. Run the model pipeline in Docker](#5-run-the-model-pipeline-in-docker)
+  * [4. Build the Pipeline Docker Images](#4-build-and-run-the-data-acquisition-pipeline-in-docker)
+  * [5. Run the pipeline in Dockers](#5-build-and-run-the-modeling-acquisition-pipeline-in-docker)
+  * [6. A note on environmental variables in the Docker commands](#6-a-note-on-environmental-variables-in-the-above-docker-commands)  
 - [Running the app in Docker](#running-the-app-in-docker)
   * [1. Connect to Northwestern VPN](#1-connect-to-northwestern-vpn)
   * [2. Configure Flask App](#2-configure-flask-app)
@@ -105,12 +106,14 @@ Business metrics:
 ├── test/                             <- Files necessary for running model tests (see documentation below) 
 │
 ├── app.py                            <- Flask wrapper for running the model 
-├── Dockerfile_Bash                   <- Dockerfile for building and running model before launching app
-├── run_full_pipeline.sh              <- Shell script for running acquisition, processing, and modeling pipeline
+├── run_acquisition.py                <- Python wrapper for running the data acquisition pipeline 
+├── run_model.py                      <- Python wrapper for running the modeling pipeline 
+├── Dockerfile_Acquire                <- Dockerfile for building and running data acquisition pipeline
+├── Dockerfile_Model                  <- Dockerfile for building and running data modeling pipeline before launching app
 ├── requirements.txt                  <- Python package dependencies 
 
 ```
-## Running the model pipeline in Docker
+## Running the data acquisition and model pipelines in Docker
 (NOTE: Use of this all Docker images require the use of Python 3.6 or higher. 
 Versions below Python 3.6 may produce unforeseen errors and should not be used.)
 
@@ -171,6 +174,13 @@ export SQLALCHEMY_DATABASE_URI='mysql+pymysql://'$MYSQL_USER':'$MYSQL_PASSWORD'@
 echo $SQLALCHEMY_DATABASE_URI
 ```   
 
+You can also specify a local/remote database at another location (like an RDS instance) by defining a database path 
+manually (shown below) and then running the above docker commands:
+
+```bash
+export SQLALCHEMY_DATABASE_URI=<your preferred engine string>
+```
+
 -  Remote SQLAlchemy Database URI (For **one-time use**): 
    -  Run the following code from the root of this repository to create and verify your MySQL environmental variables:
 ```bash
@@ -190,6 +200,12 @@ export SQLALCHEMY_DATABASE_URI='mysql+pymysql://'$MYSQL_USER':'$MYSQL_PASSWORD'@
 echo $SQLALCHEMY_DATABASE_URI
  
 ```
+You can also specify a local/remote database at another location (like an RDS instance) by defining a database path 
+manually (shown below) and then running the above docker commands:
+
+```bash
+export SQLALCHEMY_DATABASE_URI=<your preferred engine string>
+```
 
 - S3 Bucket (**one-time use**):
     -  Run the following code from the root of this repository to create and verify your selected S3 bucket:
@@ -202,35 +218,84 @@ echo $S3_BUCKET
 Once these enviromental variables have been set and implemented, you should be able to run the below Docker commands to 
 download, upload, process, and model the Citi Bikes data.
 
-### 4. Build the pipeline Docker image 
+### 4. Build and run the data acquisition pipeline in Docker
+**NOTE**: Before proceeding, it is important to know that due to the size of the raw data, necessary data processing, and memory requirements needed to complete the 
+acquisition and modeling process, expect these next two commands to take up to 10 minutes to finish executing. If after running this code for several
+minutes, you receive a nondescript `Killed` message, please return to [Step 2](#2-configure-resources-in-docker) above and increase your Docker Dashboard "Resources" configurations. 
 
-The Dockerfile for running the pipeline is in the root of this directory. To build the image, 
+#### Building the data acquisition image
+
+The Dockerfile for running the data acquisition pipeline is in the root of this directory. To build the image, 
 run from the root of this repository: 
 
 ```bash
- docker build -f Dockerfile_Bash -t citibikes-predictor-bash .
+ docker build -f Dockerfile_Acquire -t citibikes-predictor-acquire .
 ```
 
-This command builds the Docker image, with the name (tag) `citibikes-predictor-bash`. 
-It uses the instructions in `Dockerfile_Bash` and relies on the files existing in this directory.
- 
+This command builds the Docker image, with the name (tag) `citibikes-predictor-acquire`. 
+It uses the instructions in `Dockerfile_Acquire` and relies on the files existing in this directory.
 
-### 5. Run the model pipeline in Docker
+#### Running the data acquisition image
 
-In order to run the full pipeline from downloading to modeling, run the following code from the root of the repository:
+In order to run the **data acquisition** image you just built, run the following code from the root of the repository:
 
-**NOTE**: Due to the size of the raw data, necessary data processing, and memory requirements needed to complete the 
-modeling process, expect this next command to run for about 10-15 minutes. If after running this code for several
-minutes, you receive a nondescript `Killed` message, please return to Step 2 above and increase your Docker Dashboard "Resources" configurations. 
 ```bash
-docker run --mount type=bind,source="$(pwd)"/data,target=/src/data  -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e S3_BUCKET -e SQLALCHEMY_DATABASE_URI citibikes-predictor-bash run_full_pipeline.sh
+docker run --mount type=bind,source="$(pwd)"/data,target=/src/data  -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e S3_BUCKET -e SQLALCHEMY_DATABASE_URI citibikes-predictor-acquire
+``` 
+
+### 5. Build and run the modeling acquisition pipeline in Docker
+
+**NOTE**: Before proceeding, it is important to know that due to the size of the raw data, necessary data processing, and memory requirements needed to complete the 
+acquisition and modeling process, expect these next two commands to take up to 10 minutes to finish executing. If after running this code for several
+minutes, you receive a nondescript `Killed` message, please return to [Step 2](#2-configure-resources-in-docker) above and increase your Docker Dashboard "Resources" configurations. 
+
+
+
+#### Building the modeling image
+
+The Dockerfile for running the data modeling pipeline is also in the root of this directory. 
+In order to complete the modeling steps, you will also need to build this second image to run the modeling pipeline.
+To build this modeling image, run from the root of this repository:
+
+```bash
+docker build -f Dockerfile_Model -t citibikes-predictor-model . 
 ```
 
-- If no `S3_BUCKET` environmental variable is defined, the files will be uploaded into 
-the S3 bucket located at `s3://2021-msia423-lewis-brian/data/`.
+This command builds the Docker image, with the name (tag) `citibikes-predictor-model`. 
+It uses the instructions in `Dockerfile_Model` and relies on the files existing in this directory.
 
-If you would like only to create a local database created at the default path `sqlite:///data/msia423_db.db`, you can
-run the following code which removes the `MYSQL_*` environmental variables and omits using the `SQLALCHEMY_DATABASE_URI` variable:
+
+#### Running the modeling image
+
+Similarly, in order to run the **modeling** image you just built in [Step 4](#4-build-the-pipeline-docker-images), run the following code from the root of the repository:
+
+
+```bash
+docker run --mount type=bind,source="$(pwd)"/data,target=/src/data  -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e S3_BUCKET -e SQLALCHEMY_DATABASE_URI citibikes-predictor-model
+```
+
+An optional `--s3` flag can be added if pulling data from the included `S3_BUCKET` is desired for the initial processing steps, 
+but it will result in longer load times. This could be done as follows:
+
+```bash
+docker run --mount type=bind,source="$(pwd)"/data,target=/src/data  -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e S3_BUCKET -e SQLALCHEMY_DATABASE_URI citibikes-predictor-model --s3
+```
+
+**WARNING**: The ARIMA model will produce a long stream of output in the console, but this is to be expected. Nothing is going wrong, the model is simply working. 
+There may be many lines at the end of the output that say `This problem is unconstrained`.
+
+### 6. A note on environmental variables in the above Docker commands:
+
+- If no `AWS` credential environmental variables are defined, the command will throw an error. If this occurs, please return to [Step 3](#3-set-aws-credentials-and-source-required-environmental-variables) 
+  and follow those instructions.
+- If no `S3_BUCKET` environmental variable is defined, this value will default to the S3 bucket located at`2021-msia423-lewis-brian`.
+- If no `SQLALCHEMY_DATABASE_URI` environmental variable is defined as described in [Step 3](#3-set-aws-credentials-and-source-required-environmental-variables), 
+  this value will default to a local database path at `sqlite://data/msia423_db.db` 
+  -  Relatedly, if different `SQLALCHEMY_DATABASE_URI` strings are used between these two commands, the `citibikes-predictor-model` image will throw an error. 
+     In order for the `citibikes-predictor-model` image to run correctly, it will need access to the same `SQLALCHEMY_DATABASE_URI` provided in the first command.
+
+If you are intentionally trying to **only** create a local database created at the default path `sqlite:///data/msia423_db.db`, you can
+run the following code which removes the `MYSQL_*` and `SQLALCHEMY_DATABASE_URI` environmental variables before also omitting the `-e SQLALCHEMY_DATABASE_URI` segment before running either of the docker commands:
 
 ```bash
 unset MYSQL_USER
@@ -238,16 +303,7 @@ unset MYSQL_PASSWORD
 unset MYSQL_HOST
 unset MYSQL_PORT
 unset MYSQL_DATABASE
-
-docker run --mount type=bind,source="$(pwd)"/data,target=/src/data  -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e S3_BUCKET citibikes-predictor-bash run_full_pipeline.sh
-```
-
-You can also create a local/remote database at another location by defining a database path manually and running the command as follows:
-
-```bash
-export SQLALCHEMY_DATABASE_URI=<your preferred engine string>
-
-docker run --mount type=bind,source="$(pwd)"/data,target=/src/data  -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e S3_BUCKET -e SQLALCHEMY_DATABASE_URI citibikes-predictor-bash run_full_pipeline.sh
+unset SQLALCHEMY_DATABASE_URI
 ```
 
 ## Running the app in Docker
@@ -303,7 +359,7 @@ You should now be able to access the app at http://0.0.0.0:5000/ in your browser
 
 ### 5. Killing the Container
 
-If you are done using the app, you can kill the container running the app with the following command:
+If you are done using the app, you can kill the container running the app in a different terminal with the following command:
 
 ```bash
 docker kill citibike
@@ -317,5 +373,5 @@ Tests have been developed for all the modules listed above and reside in `tests/
 *  Execute the following code:
 
 ```bash
- docker run citibikes-predictor -m pytest test/
+ docker run citibikes-predictor-model -m pytest test/
 ```

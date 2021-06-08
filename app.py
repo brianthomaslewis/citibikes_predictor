@@ -25,6 +25,7 @@ logger.debug('Web app log')
 # Initialize the database session
 bike_manager = BikeManager(app)
 
+
 # Create forms for webpage
 
 class Form(FlaskForm):

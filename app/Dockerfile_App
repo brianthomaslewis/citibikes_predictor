@@ -4,7 +4,7 @@ RUN apt-get update -y && apt-get install -y python3-pip python3-dev git gcc dos2
 
 COPY ./requirements.txt /app/requirements.txt
 COPY ./src/helper_db.py /app/helper_db.py
-COPY ./data/msia423_db.db /app/data/msia423_db.db
+COPY ./data /app/data
 COPY ./config/logging/local.conf /app/local.conf
 
 WORKDIR /app

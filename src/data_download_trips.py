@@ -5,21 +5,19 @@ import itertools
 import zipfile
 import datetime
 import shutil
-import logging.config
+import logging
 from time import sleep
 import requests
 import pandas as pd
 from pathlib import Path
 from multiprocessing.pool import ThreadPool
-from helper_months import to_month, iter_months
-import helper_s3
-import config
+from src.helper_months import to_month, iter_months
+from src.helper_s3 import upload_to_s3
 
-# logging.config.fileConfig(fname="local.conf")
+# Logging
 logger = logging.getLogger(__name__)
 
-""" Script downloads Citibikes trips data for the YYYYMM periods specified in config.py
-"""
+""" Script downloads Citibikes trips data for the YYYYMM periods specified in config.py"""
 
 
 def download_trips_data(month_start, month_end, zip_data_path, csv_data_path, url_stem, suffix_1, suffix_2, label_chunk,
@@ -71,7 +69,7 @@ def download_trips_data(month_start, month_end, zip_data_path, csv_data_path, ur
         Takes the a url and downloads the file associated with it using the `requests` module.
 
         Args:
-            url: the URL from which to download data.
+            url (list/str): the URL from which to download data.
 
         Returns: the file located at the above URL
 
@@ -157,7 +155,6 @@ def download_trips_data(month_start, month_end, zip_data_path, csv_data_path, ur
 
             # Export to csv
             flows.to_csv(path[1])
-            # trips_df.append(flows)
 
     except Exception as err:
         logger.error(err)
@@ -175,7 +172,7 @@ def download_trips_data(month_start, month_end, zip_data_path, csv_data_path, ur
     logger.info("Success! Wrote Citi Bikes trip output to %s.", output_path)
 
     # Add trips data to S3 bucket
-    helper_s3.upload_to_s3(output_path, s3_bucket, s3_directory)
+    upload_to_s3(output_path, s3_bucket, s3_directory)
     logger.info("Success! Wrote Citi Bike stations data to '%s' S3 bucket in '%s' folder.", s3_bucket, s3_directory)
 
     # Remove raw and intermediate data (if output performed correctly)

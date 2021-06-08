@@ -6,15 +6,18 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy import SQLAlchemy
-import helper_db
-import config as connection_config
+from src.helper_db import get_engine
 
+# Logging
 logger = logging.getLogger(__name__)
 
+# Set base class
 Base = declarative_base()
 
+"""Sets data models for database setup, creates database using engine string"""
 
-class Bike_Stock(Base):
+
+class BikeStock(Base):
     """Create a data model for the database to be set up for bike stock data """
     __tablename__ = 'bike_stock'
     station_id = Column(Integer, primary_key=True)
@@ -26,7 +29,7 @@ class Bike_Stock(Base):
     stock = Column(Integer, unique=False, nullable=True)
 
     def __repr__(self):
-        return "<Bike_Stock(station_id='%r', date='%r', hour='%r', name='%r', latitude='%r', longitude='%r', " \
+        return "<BikeStock(station_id='%r', date='%r', hour='%r', name='%r', latitude='%r', longitude='%r', " \
                "stock='%r')>" % (self.station_id, self.date, self.hour, self.name, self.latitude,
                                  self.longitude, self.stock)
 
@@ -43,7 +46,7 @@ class Predictions(Base):
     pred_num_bikes = Column(Integer, unique=False, nullable=True)
 
     def __repr__(self):
-        return "<Bike_Stock(station_id='%r', date='%r', hour='%r', pred_num_bikes='%r')>" % \
+        return "<Predictions(station_id='%r', date='%r', hour='%r', pred_num_bikes='%r')>" % \
                (self.station_id, self.date, self.hour, self.pred_num_bikes)
 
 
@@ -69,8 +72,8 @@ class BikeManager:
     def __init__(self, app=None, engine_string=None):
         """
         Args:
-            app: Flask - Flask app
-            engine_string: str - Engine string
+            app (Flask): Flask app
+            engine_string (str): Engine string
         """
         if app:
             self.db = SQLAlchemy(app)
@@ -83,9 +86,7 @@ class BikeManager:
             raise ValueError("Need either an engine string or a Flask app to initialize")
 
     def close(self) -> None:
-        """Closes session
-        Returns: None
-        """
+        """Closes session, returns: None"""
         self.session.close()
 
 
@@ -96,13 +97,13 @@ def create_db(args):
 
     Args:
         args: From argparse:
-            engine_string: String giving the connection details to the listed database
+            engine_string (str): String giving the connection details to the listed database
 
     Returns: none (database created with data models)
     """
 
     # Create db at specified engine string
-    engine = helper_db.get_engine(args.engine_string)
+    engine = get_engine(args.engine_string)
     try:
         logger.info("Attempting to initialize database on %s", args.engine_string)
         Base.metadata.create_all(engine)
@@ -113,11 +114,3 @@ def create_db(args):
         logger.error("Could not connect to the specified MySQL server. "
                      "Verify your connection is on the Northwestern VPN before retrying.")
         sys.exit(1)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Create tables citibike-predictor database")
-    parser.add_argument("--engine_string", default=connection_config.SQLALCHEMY_DATABASE_URI,
-                        help="Optional engine string for sqlalchemy")
-    args = parser.parse_args()
-    create_db(args)

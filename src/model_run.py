@@ -1,22 +1,20 @@
 import pandas as pd
 import numpy as np
 import warnings
+import argparse
+import yaml
+import logging
+import sys
+import os
+from datetime import datetime
 from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 from sklearn.model_selection import TimeSeriesSplit
-import argparse
-import yaml
-import logging.config
-import sys
-from datetime import datetime
-import os
-from helper_months import date_range
-from helper_db import get_engine, add_to_database, get_data_from_database
-from helper_s3 import upload_to_s3
-import config as connection_config
+from src.helper_months import date_range
+from src.helper_db import get_engine, add_to_database, get_data_from_database
+from src.helper_s3 import upload_to_s3
 
 # Logging
-# logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)s', level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
 
@@ -34,9 +32,7 @@ def read_data_from_db(table, engine_string=None):
     engine = get_engine(engine_string)
 
     # query the database
-    query = f"""SELECT * FROM {table} 
---     LIMIT 10000
-    """
+    query = f"""SELECT * FROM {table} """
     df = get_data_from_database(query, engine_string)
 
     return df
@@ -157,6 +153,7 @@ def run_train_models(args):
         sys.exit(1)
 
     # get station level data, train station forecasting models
+    logger.info('Reading in time series "bike_stock" data from database at %s...', args.engine_string)
     station_data = read_data_from_db('bike_stock', args.engine_string)
     logger.info("Training models for each station, this will take a few moments.")
     logger.warning("You may see some warnings issued from the ARIMA fit. Due to the nature of the data for some "
@@ -173,10 +170,11 @@ def run_train_models(args):
     prediction_df = prediction_df[['station_id', 'name', 'latitude', 'longitude', 'date', 'hour', 'pred_num_bikes']]. \
         sort_values(['longitude', 'latitude'], ascending=(True, False))
 
-    # Save predictions and station-level MAPE to local file
+    # Save predictions to local file
     prediction_df.to_csv(config['model_run']['prediction_path'], index=False)
     logger.info('Success! Added predictions data locally to: "%s"', config['model_run']['prediction_path'])
 
+    # Save station-level MAPE to local file
     station_mapes.to_csv(config['model_run']['mape_path'], index=False)
     logger.info('Success! Added predictions data locally to: "%s"', config['model_run']['mape_path'])
 
@@ -188,21 +186,9 @@ def run_train_models(args):
                 args.s3_bucket, config['model_run']['bucket_dir_path'])
 
     # Save predictions to Database
-    logger.info('Writing predictions data to database.')
+    logger.info('Writing predictions data to database at %s.', args.engine_string)
     add_to_database(prediction_df, "predictions", 'replace', args.engine_string)
     logger.info('Success! Added predictions data to the database at "%s"', args.engine_string)
 
     # Report average MAPE
     logger.info('Average MAPE across all stations: %s', str(station_mapes.MAPE.mean()))
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Train time-series forecasting model(s) for stock numbers')
-    parser.add_argument('--config', '-c', default='config/config.yaml', help='path to yaml file with configurations')
-    parser.add_argument("--engine_string", default=connection_config.SQLALCHEMY_DATABASE_URI,
-                        help="Manually specified engine location.")
-    parser.add_argument("--s3_bucket", default=connection_config.S3_BUCKET, help="s3 bucket name")
-    arguments = parser.parse_args()
-    run_train_models(arguments)
-
-    logger.info("model_run.py was run successfully.")

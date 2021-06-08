@@ -3,13 +3,12 @@ from urllib.request import urlopen
 import json
 import os
 import sys
-import logging.config
+import logging
 import pandas as pd
-import helper_db as helper_data
-import helper_s3 as helper_s3
-import config
+from src.helper_db import add_to_database
+from src.helper_s3 import upload_to_s3
 
-# logging.config.fileConfig(fname="local.conf")
+# Logging
 logger = logging.getLogger(__name__)
 
 
@@ -59,12 +58,12 @@ def download_stations_data(url, stations_output_path, s3_bucket, s3_directory, e
     logger.info("Success! Wrote Citi Bike stations data to local filepath '%s'.", stations_output_path)
 
     # Add stations data to S3 bucket
-    helper_s3.upload_to_s3(stations_output_path, s3_bucket, s3_directory)
+    upload_to_s3(stations_output_path, s3_bucket, s3_directory)
     logger.info("Success! Wrote Citi Bike stations data to '%s' S3 bucket in '%s' folder.", s3_bucket, s3_directory)
 
     # Add pared-down stations data to MySQL database
     response_trimmed = response[['station_id', 'name', 'latitude', 'longitude']]
-    helper_data.add_to_database(response_trimmed, "stations", 'replace', engine_string)
+    add_to_database(response_trimmed, "stations", 'replace', engine_string)
     logger.info("Success! Wrote Citi Bike stations data to MySQL database.")
 
 
