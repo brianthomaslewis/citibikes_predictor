@@ -84,3 +84,5 @@ model_run:
 read_db:
   bike_stock: ['station_id','date','name','latitude','longitude','stock']
   stations: ['station_id','name','latitude','longitude','capacity','num_bikes_available','last_reported']
+
+avg_mape_filepath: 'data/avg_mape.csv'

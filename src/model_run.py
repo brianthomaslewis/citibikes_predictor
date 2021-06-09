@@ -208,11 +208,25 @@ def run_train_models(args):
     logger.info('Success! Added predictions evaluation data '
                 'locally to: "%s"', config['model_run']['mape_path'])
 
+    # Save average MAPE to local file
+    avg_mape = open(config['avg_mape_filepath'], "w")
+    avg_mape.write('Average MAPE across all stations: ' +
+                   str(station_mapes.MAPE.mean()))
+    avg_mape.close()
+    logger.info('Success! Added avg. MAPE data '
+                'locally to: "%s"', config['avg_mape_filepath'])
+
     # Save predictions and performance metrics to S3
+    # Predictions
     upload_to_s3(file_local_path=config['model_run']['prediction_path'],
                  s3_bucket=args.s3_bucket,
                  s3_directory=config['model_run']['bucket_dir_path'])
+    # Performance metrics
     upload_to_s3(file_local_path=config['model_run']['mape_path'],
+                 s3_bucket=args.s3_bucket,
+                 s3_directory=config['model_run']['bucket_dir_path'])
+    # Average MAPE
+    upload_to_s3(file_local_path=config['avg_mape_filepath'],
                  s3_bucket=args.s3_bucket,
                  s3_directory=config['model_run']['bucket_dir_path'])
     logger.info('Success! Added predictions and performance '
@@ -227,6 +241,6 @@ def run_train_models(args):
     logger.info('Success! Added predictions data to the database'
                 ' at "%s"', args.engine_string)
 
-    # Report average MAPE
+    # Report average MAPE, write to a csv file
     logger.info('Average MAPE across all stations: %s',
                 str(station_mapes.MAPE.mean()))
