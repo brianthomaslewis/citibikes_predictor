@@ -65,7 +65,7 @@ Citi Bike Trips Data source: [NYC Citi Bike Trips](https://s3.amazonaws.com/trip
 
 Model performance metric:
 
- - The model will succeed if it can predict the number of available bikes at a given bike station, date, and time of day with a MAPE of <= 15%. 
+ - The model will succeed if it can predict the number of available bikes at a given bike station, date, and time of day with a MAPE of <= 30%. 
 
 Business metrics:
 
