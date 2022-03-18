@@ -20,7 +20,7 @@ def model_fun(dataframe, start_date_args, end_date_args, model_params, optional_
     Trains a ARIMA model for forecasting inventory for each Citi Bike station
         that has the necessary data
     Args:
-        dataframe (pandas DataFrame): input data consisting of confirmed cases globally by day
+        dataframe (pandas DataFrame): input data consisting of bikes by station by day
         start_date_args (dict): ARIMA model required fit parameters
         end_date_args (dict): ARIMA model required fit parameters
         model_params (dict): ARIMA model required fit parameters
