@@ -2,9 +2,6 @@
 
 **Project Owner: Brian Lewis**
 
-**QA Partner: Michael Faulkner**
-
-
 <!-- toc -->
 
 - [Project Charter](#project-charter)
