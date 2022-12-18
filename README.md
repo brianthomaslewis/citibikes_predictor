@@ -278,10 +278,7 @@ unset SQLALCHEMY_DATABASE_URI
 (NOTE: Use of this all Docker images require the use of Python 3.6 or higher. 
 Versions below Python 3.6 may produce unforeseen errors and should not be used.)
 
-### 1. Connect to Northwestern VPN (if not already done previously)
-If you haven't already, [connect to Northwestern VPN](#1-connect-to-northwestern-vpn).
-
-### 2. Configure Flask App
+### 1. Configure Flask App
 `config/flaskconfig.py` holds the configurations for the Flask app. It includes the following configurations.
 **Please check for yourself to see if these are what you'd like to use. If so, proceed.**
 
@@ -295,7 +292,7 @@ APP_NAME = "citibikes-predictor"
 SQLALCHEMY_ECHO = False
 ```
 
-### 3. Build the web app image
+### 2. Build the web app image
 
 The Dockerfile for running the flask app is in the `app/` folder. To build the image, run the following
 commands from the root of this directory:
@@ -307,7 +304,7 @@ docker build -f app/Dockerfile_App -t citibikes-predictor .
 This command builds the Docker image, with the tag `citibikes-predictor`, based on the instructions in 
 app/Dockerfile_App, and the files existing in this directory.
 
-### 4. Run the web app container
+### 3. Run the web app container
 
 If you created the database locally in `data/msia423_db.db`, you can run this container locally
 by executing the following command from this directory:
@@ -325,7 +322,7 @@ docker run -e SQLALCHEMY_DATABASE_URI -p 5000:5000 --name citibike citibikes-pre
 
 You should now be able to access the app at http://0.0.0.0:5000/ in your browser.
 
-### 5. Kill the named web app container
+### 4. Kill the named web app container
 
 If you are done using the app, you can kill the container running the app in a different terminal with the following command:
 
