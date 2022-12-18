@@ -117,11 +117,7 @@ Business metrics:
 
 ## Environment setup before running commands in Docker
 
-### 1. Connect to Northwestern VPN
-Before completing any other steps, please first connect to the Northwestern VPN. Without a connection to the Northwestern VPN, 
-other steps in the pipeline process may not work as designed.
-
-### 2. Configure resources in Docker
+### 1. Configure resources in Docker
 Due to the nature of the model and the size of the data involved, running this pipeline succesfully
 will require increasing the resources in Docker beyond their default setting. Please follow these steps in order to configure Docker properly:
 
@@ -132,7 +128,7 @@ will require increasing the resources in Docker beyond their default setting. Pl
   - Toggle "Memory" = 6.00 GB
   - Toggle "Swap" = 1 GB  
     
-### 3. Set AWS credentials and source required environmental variables 
+### 2. Set AWS credentials and source required environmental variables 
 
 Before downloading the raw Citi Bikes data, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `SQLALCHEMY_DATABASE_URI` and 
 `S3_BUCKET` should be environmental variables in your current terminal session. 
